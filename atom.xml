@@ -85,31 +85,6 @@
   </entry>
   
   <entry>
-    <title>过年啦，辞旧迎新中国年</title>
-    <link href="https://841809077.github.io/2021/02/11/MySelf/happy-new-year-2021.html"/>
-    <id>https://841809077.github.io/2021/02/11/MySelf/happy-new-year-2021.html</id>
-    <published>2021-02-10T18:43:47.000Z</published>
-    <updated>2021-02-11T02:58:14.851Z</updated>
-    
-    <content type="html"><![CDATA[<div id="vip-container"><p>过年啦的歌：过年啦过年啦辞旧迎新过年啦</p><p>过年啦，过年啦，过年啦，辞旧迎新中国年。</p><p>2020年注定是不平凡的一年，在国外疫情如此严重的情况下，国内疫情得到有效控制。这样对比下来，我们更要珍惜这个来之不易的新年。</p><p>新年新气象，在除夕这个特别的节日里，提前祝愿大家在牛年的日子里，“钱”程似锦，“富”如东海，“瘦”比南山，“性”福美满，“鑫”春快乐！！</p><p>大年初一，11:40，将准时发车，240 元的红包给大家，图个乐呵，大家千万不要错过哦！</p></div><script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script><script>var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);if (!isMobile) {    var btw = new BTWPlugin();    btw.init({        "id": "vip-container",        "blogId": "15743-1570943068343-906",        "name": "大数据实战演练",        "qrcode": "https://cdn.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",        "keyword": "vip"    });}</script>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;div id=&quot;vip-container&quot;&gt;&lt;p&gt;过年啦的歌：过年啦过年啦辞旧迎新过年啦&lt;/p&gt;
-&lt;p&gt;过年啦，过年啦，过年啦，辞旧迎新中国年。&lt;/p&gt;
-&lt;p&gt;2020年注定是不平凡的一年，在国外疫情如此严重的情况下，国内疫情得到有效控制。这样对比下来，我们更要珍惜这个来之不
-      
-    
-    </summary>
-    
-      <category term="你有酒我有故事" scheme="https://841809077.github.io/categories/%E4%BD%A0%E6%9C%89%E9%85%92%E6%88%91%E6%9C%89%E6%95%85%E4%BA%8B/"/>
-    
-    
-  </entry>
-  
-  <entry>
     <title>快来看，全网少有的Ambari自定义服务集成实战（全）</title>
     <link href="https://841809077.github.io/2021/02/10/Ambari/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1/ambari-custom-service-add-pro.html"/>
     <id>https://841809077.github.io/2021/02/10/Ambari/自定义服务/ambari-custom-service-add-pro.html</id>
@@ -489,6 +464,29 @@
     </summary>
     
       <category term="HBase" scheme="https://841809077.github.io/categories/HBase/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>spring boot项目中自动执行sql语句</title>
+    <link href="https://841809077.github.io/2020/08/17/Spring%20boot/spring-boot-project-auto-execute-sql.html"/>
+    <id>https://841809077.github.io/2020/08/17/Spring boot/spring-boot-project-auto-execute-sql.html</id>
+    <published>2020-08-17T06:02:19.000Z</published>
+    <updated>2021-01-17T04:28:28.857Z</updated>
+    
+    <content type="html"><![CDATA[<div id="vip-container"><blockquote><p>现在很多项目，都时兴用容器化部署，不易报错，部署方便都是这种部署方式的优点。但对于 spring boot mysql 项目来说，如何在项目启动前，就自动地创建数据库和初始化sql脚本呢？本文提供一种解决办法。</p></blockquote><h3 id="一、添加配置"><a href="#一、添加配置" class="headerlink" title="一、添加配置"></a>一、添加配置</h3><h4 id="1、配置介绍"><a href="#1、配置介绍" class="headerlink" title="1、配置介绍"></a>1、配置介绍</h4><p>在 properties 或 yaml 文件里面，添加以下配置（以 yaml 配置文件为例）：</p><a id="more"></a><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">spring:</span><br><span class="line">  datasource:</span><br><span class="line">    schema:</span><br><span class="line">      - classpath:static/xxx.sql</span><br><span class="line">    initialization-mode: ALWAYS</span><br></pre></td></tr></table></figure><p>添加以上两个配置即可。</p><ul><li>spring.datasource.schema：sql脚本的位置，classpath 路径。</li><li>spring.datasource.initialization-mode：初始化模式，有三个选择，分别是：<ul><li>ALWAYS：始终初始化数据源。</li><li>EMBEDDED：仅初始化嵌入式数据源。</li><li>NEVER：不初始化数据源。</li></ul></li></ul><p>这里我选择的初始化模式为 ALWAYS 。</p><h4 id="2、sql-脚本说明"><a href="#2、sql-脚本说明" class="headerlink" title="2、sql 脚本说明"></a>2、sql 脚本说明</h4><p>sql 脚本需要放在 resources/static 目录下，配置里面指定 classpath 地址。</p><p>sql 执行脚本部分内容如下：</p><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 修改数据库的编码格式为utf8</span><br><span class="line"><span class="keyword">ALTER</span> <span class="keyword">DATABASE</span> xxx <span class="built_in">character</span> <span class="keyword">set</span> utf8 <span class="keyword">collate</span> utf8_general_ci;</span><br><span class="line"># 切换到某数据库下</span><br><span class="line"><span class="keyword">USE</span> xxx;</span><br><span class="line"># 创建表</span><br><span class="line">...(省略)</span><br></pre></td></tr></table></figure><h4 id="3、自动创建数据库"><a href="#3、自动创建数据库" class="headerlink" title="3、自动创建数据库"></a>3、自动创建数据库</h4><p>在 spring.datasource.url 中，可以在指定数据库的同时，设置数据库如果不存在就自动创建，createDatabaseIfNotExist=true 。配置如下：</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring:</span></span><br><span class="line"><span class="attr">  datasource:</span></span><br><span class="line"><span class="attr">    driver-class-name:</span> <span class="string">com.mysql.cj.jdbc.Driver</span></span><br><span class="line"><span class="attr">    url:</span> <span class="attr">jdbc:mysql://0.0.0.0:3306/xxx?createDatabaseIfNotExist=true&amp;useUnicode=true&amp;useJDBCCompliantTimezoneShift=true&amp;useLegacyDatetimeCode=false&amp;serverTimezone=Asia/Shanghai&amp;characterEncoding=utf8</span></span><br><span class="line"><span class="attr">    username:</span> <span class="string">root</span></span><br><span class="line"><span class="attr">    password:</span> <span class="string">xxx</span></span><br></pre></td></tr></table></figure><h3 id="二、总结"><a href="#二、总结" class="headerlink" title="二、总结"></a>二、总结</h3><p>关于实现在项目启动前，如何自动创建数据库和初始化sql脚本，本文就提供了一种方法，全部是基于修改 spring boot 配置文件来实现的。现在截一下全部的图：</p><p><img src="https://gitee.com/create17/blog-img/raw/master/202008/20200817143429.png" alt></p></div><script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script><script>var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);if (!isMobile) {    var btw = new BTWPlugin();    btw.init({        "id": "vip-container",        "blogId": "15743-1570943068343-906",        "name": "大数据实战演练",        "qrcode": "https://cdn.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",        "keyword": "vip"    });}</script>]]></content>
+    
+    <summary type="html">
+    
+      &lt;blockquote&gt;
+&lt;p&gt;现在很多项目，都时兴用容器化部署，不易报错，部署方便都是这种部署方式的优点。但对于 spring boot mysql 项目来说，如何在项目启动前，就自动地创建数据库和初始化sql脚本呢？本文提供一种解决办法。&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id=&quot;一、添加配置&quot;&gt;&lt;a href=&quot;#一、添加配置&quot; class=&quot;headerlink&quot; title=&quot;一、添加配置&quot;&gt;&lt;/a&gt;一、添加配置&lt;/h3&gt;&lt;h4 id=&quot;1、配置介绍&quot;&gt;&lt;a href=&quot;#1、配置介绍&quot; class=&quot;headerlink&quot; title=&quot;1、配置介绍&quot;&gt;&lt;/a&gt;1、配置介绍&lt;/h4&gt;&lt;p&gt;在 properties 或 yaml 文件里面，添加以下配置（以 yaml 配置文件为例）：&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="springboot" scheme="https://841809077.github.io/categories/springboot/"/>
     
     
   </entry>
