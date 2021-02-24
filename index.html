@@ -13,7 +13,16 @@
 </blockquote>
 <p>以下，都是收集于网友、群友安装 ambari 或部署 hdp 集群时出现的问题，挤时间写了个疑难问题解答汇总，希望能够快速帮小伙伴们定位解决问题。<strong>觉得文章靠谱的小伙伴，希望能转发、点赞、在看三连走一波~</strong></p>
 <h3 id="一、hdp-version-丢失"><a href="#一、hdp-version-丢失" class="headerlink" title="一、hdp version 丢失"></a>一、hdp version 丢失</h3></div><p class="readmore"><a href="/2021/02/23/Ambari/安装部署/ambari-hdp-deploy-faq.html">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2021/02/22/k8s&amp;docker/k8s-ide-lens.html">Kubernetes可视化工具，文末附下载地址</a></h2><div class="post-meta"><p><span class="date">2021-02-22</span><span><a href="/categories/K8s/" class="category">K8s</a></span></p></div><div class="post-content"><h3 id="一、Lens-介绍"><a href="#一、Lens-介绍" class="headerlink" title="一、Lens 介绍"></a>一、Lens 介绍</h3><p>Lens 是一个强大的 kubernetes IDE。可以实时查看 kubernetes 集群状态，比如 Pod实时日志查看、集群Events实时查看、集群故障排查等。有了 Lens，不在需要敲打很长的 kubectl 命令，只要使用鼠标点击几下，非常便捷。</p>
-<p>Lens 支持多平台安装，目前支持 Linux、MacOS、Windows。</p></div><p class="readmore"><a href="/2021/02/22/k8s&amp;docker/k8s-ide-lens.html">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2021/02/10/Ambari/自定义服务/ambari-custom-service-add-pro.html">快来看，全网少有的Ambari自定义服务集成实战（全）</a></h2><div class="post-meta"><p><span class="date">2021-02-10</span><span><a href="/categories/Ambari/" class="category">Ambari</a></span></p></div><div class="post-content"><div id="vip-container"><h3 id="一、Ambari自定义服务集成实战"><a href="#一、Ambari自定义服务集成实战" class="headerlink" title="一、Ambari自定义服务集成实战"></a>一、Ambari自定义服务集成实战</h3><p>熟悉我的人都知道，2020年我录制了《Ambari自定义服务集成》的系列视频，视频中以 Ambari 2.7 集成 Elasticsearch v6.4.0 服务为例，从0到1，完成了以下功能，完全达到生产交付的标准：</p></div><p class="readmore"><a href="/2021/02/10/Ambari/自定义服务/ambari-custom-service-add-pro.html">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2021/01/14/Kafka/multi-thread-kafka-consumer.html">多线程消费Kafka</a></h2><div class="post-meta"><p><span class="date">2021-01-14</span></p></div><div class="post-content"><h3 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h3><p>最近研究了一下多线程消费 Kafka ，其实大体可以分为两种方式，本文只介绍一种，相对而言比较通俗易懂。</p>
+<p>Lens 支持多平台安装，目前支持 Linux、MacOS、Windows。</p></div><p class="readmore"><a href="/2021/02/22/k8s&amp;docker/k8s-ide-lens.html">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2021/02/10/Ambari/自定义服务/ambari-custom-service-add-pro.html">快来看，全网少有的Ambari自定义服务集成实战（全）</a></h2><div class="post-meta"><p><span class="date">2021-02-10</span><span><a href="/categories/Ambari/" class="category">Ambari</a></span></p></div><div class="post-content"><h3 id="一、Ambari自定义服务集成实战"><a href="#一、Ambari自定义服务集成实战" class="headerlink" title="一、Ambari自定义服务集成实战"></a>一、Ambari自定义服务集成实战</h3><p>熟悉我的人都知道，2020年我录制了《Ambari自定义服务集成》的系列视频，视频中以 Ambari 2.7 集成 Elasticsearch v6.4.0 服务为例，从0到1，完成了以下功能，完全达到生产交付的标准：</p>
+<p><strong>基本功能：</strong></p>
+<ul>
+<li>可通过ambari向导自主安装部署、启动、停止、卸载Elasticsearch服务。</li>
+<li>通过ambari界面实时监测Elasticsearch服务运行状态</li>
+</ul>
+<p><strong>扩展功能：</strong></p>
+<ul>
+<li>在页面上新增配置或修改配置，重启服务后，使配置生效</li>
+</ul></div><p class="readmore"><a href="/2021/02/10/Ambari/自定义服务/ambari-custom-service-add-pro.html">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2021/01/14/Kafka/multi-thread-kafka-consumer.html">多线程消费Kafka</a></h2><div class="post-meta"><p><span class="date">2021-01-14</span></p></div><div class="post-content"><h3 id="一、概述"><a href="#一、概述" class="headerlink" title="一、概述"></a>一、概述</h3><p>最近研究了一下多线程消费 Kafka ，其实大体可以分为两种方式，本文只介绍一种，相对而言比较通俗易懂。</p>
 <p>创建线程池，程序启动多个线程，每个线程创建对应的消费者实例，负责完整的消息获取、处理、offset 提交。</p>
 <table>
 <thead>

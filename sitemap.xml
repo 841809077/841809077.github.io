@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://841809077.github.io/2021/02/10/Ambari/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1/ambari-custom-service-add-pro.html</loc>
+    
+    <lastmod>2021-02-24T14:40:25.837Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://841809077.github.io/2021/02/23/Ambari/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/ambari-hdp-deploy-faq.html</loc>
     
     <lastmod>2021-02-24T14:08:55.483Z</lastmod>
@@ -47,13 +54,6 @@
     <loc>https://841809077.github.io/2020/07/28/k8s&docker/create-chart-package.html</loc>
     
     <lastmod>2021-02-22T05:54:43.701Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://841809077.github.io/2021/02/10/Ambari/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1/ambari-custom-service-add-pro.html</loc>
-    
-    <lastmod>2021-02-17T03:31:37.471Z</lastmod>
     
   </url>
   

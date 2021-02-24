@@ -4,6 +4,24 @@
 
     
   <url>
+    <loc>https://841809077.github.io/2021/02/10/Ambari/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1/ambari-custom-service-add-pro.html</loc>
+    <lastmod>2021-02-24T14:40:25.837Z</lastmod>
+    <data>
+        <display>
+        <title>快来看，全网少有的Ambari自定义服务集成实战（全）</title>
+        <pubTime>2021-02-10T15:56:57.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="Ambari" url="https://841809077.github.io/categories/Ambari/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>https://841809077.github.io/2021/02/23/Ambari/%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/ambari-hdp-deploy-faq.html</loc>
     <lastmod>2021-02-24T14:08:55.483Z</lastmod>
     <data>
@@ -125,24 +143,6 @@
            
              
               <breadCrumb title="K8s" url="https://841809077.github.io/categories/K8s/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>https://841809077.github.io/2021/02/10/Ambari/%E8%87%AA%E5%AE%9A%E4%B9%89%E6%9C%8D%E5%8A%A1/ambari-custom-service-add-pro.html</loc>
-    <lastmod>2021-02-17T03:31:37.471Z</lastmod>
-    <data>
-        <display>
-        <title>快来看，全网少有的Ambari自定义服务集成实战（全）</title>
-        <pubTime>2021-02-10T15:56:57.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="Ambari" url="https://841809077.github.io/categories/Ambari/"/>
           
         </display>
     </data>
