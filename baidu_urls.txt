@@ -1,1 +1,1 @@
-https://841809077.github.io/2021/03/03/k8s&docker/chart-command-collection.html
+https://841809077.github.io/2021/03/21/Ambari/自定义服务/ambari-custom-service-video-course-introduce.html
