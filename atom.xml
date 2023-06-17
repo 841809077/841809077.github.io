@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://841809077.github.io/"/>
-  <updated>2022-11-17T03:38:51.058Z</updated>
+  <updated>2023-03-13T08:45:34.047Z</updated>
   <id>https://841809077.github.io/</id>
   
   <author>
@@ -15,6 +15,26 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Elasticsearch Query DSL 查询</title>
+    <link href="https://841809077.github.io/2023/03/13/ELK/Elasticsearch/API/es-query-dsl.html"/>
+    <id>https://841809077.github.io/2023/03/13/ELK/Elasticsearch/API/es-query-dsl.html</id>
+    <published>2023-03-13T08:25:07.000Z</published>
+    <updated>2023-03-13T08:45:34.047Z</updated>
+    
+    <content type="html"><![CDATA[<div id="vip-container"><p>复合查询除布尔查询，还有其他查询，可见官网：<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/compound-queries.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/reference/current/compound-queries.html</a></p><a id="more"></a><p>布尔查询支持的子查询类型共有四种，分别是：<br>查询上下文：</p><ul><li>must：文档必须匹配must查询条件，贡献评分</li><li>should：文档应该匹配should子句查询的一个或多个，贡献评分<br>过滤上下文：</li><li>must_not：文档不能匹配该查询条件，不贡献评分</li><li>filter：过滤器，文档必须匹配该过滤条件，跟must子句的唯一区别是，filter不贡献评分；</li></ul><h4 id="match-Query：全文匹配，先分词再匹配，用于模糊查询"><a href="#match-Query：全文匹配，先分词再匹配，用于模糊查询" class="headerlink" title="match Query：全文匹配，先分词再匹配，用于模糊查询"></a>match Query：全文匹配，先分词再匹配，用于模糊查询</h4><h4 id="term-Query：精准查询"><a href="#term-Query：精准查询" class="headerlink" title="term Query：精准查询"></a>term Query：精准查询</h4><h3 id="单条件查询"><a href="#单条件查询" class="headerlink" title="单条件查询"></a>单条件查询</h3><p>{<br>  “query”: {<br>    “bool”: {<br>      “filter”: {<br>        “term”: {<br>          “SourceName”: “料斗温度”<br>        }<br>      }<br>    }<br>  }<br>}</p><h3 id="多查询条件-and"><a href="#多查询条件-and" class="headerlink" title="多查询条件 and"></a>多查询条件 and</h3><p>{<br>  “query”: {<br>    “bool”: {<br>      “filter”: [<br>        {<br>          “range”: {<br>            “Time”: {<br>              “lt”: 1663921028000<br>            }<br>          }<br>        },<br>        {<br>          “term”: {<br>            “SourceName”: “料斗温度”<br>          }<br>        }<br>      ]<br>    }<br>  }<br>}</p><p>### </p><p>你真的需要在查询时对文档进行评分吗？</p><h2 id="Filter"><a href="#Filter" class="headerlink" title="Filter"></a>Filter</h2><p>搜索精确值、范围值</p><h2 id="Query"><a href="#Query" class="headerlink" title="Query"></a>Query</h2><p>模棱两可的结果，全文搜索</p><p>term在查询时只能精确查询，match是全文查询，而字段类型为keyword的内容不管用哪种方式，都只能精确查询</p></div><script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script><script>var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);if (!isMobile) {    var btw = new BTWPlugin();    btw.init({        "id": "vip-container",        "blogId": "15743-1570943068343-906",        "name": "大数据实战演练",        "qrcode": "https://gcore.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",        "keyword": "vip"    });}</script>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;复合查询除布尔查询，还有其他查询，可见官网：&lt;a href=&quot;https://www.elastic.co/guide/en/elasticsearch/reference/current/compound-queries.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;https://www.elastic.co/guide/en/elasticsearch/reference/current/compound-queries.html&lt;/a&gt;&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="ELK" scheme="https://841809077.github.io/categories/ELK/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>Elasticsearch查询报错：FIELDDATA Data is too large</title>
@@ -71,9 +91,9 @@
     <link href="https://841809077.github.io/2022/10/12/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-client-query.html"/>
     <id>https://841809077.github.io/2022/10/12/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-client-query.html</id>
     <published>2022-10-12T02:17:28.000Z</published>
-    <updated>2022-11-17T03:38:50.972Z</updated>
+    <updated>2023-03-13T02:34:59.786Z</updated>
     
-    <content type="html"><![CDATA[<div id="vip-container"><p>以下为 Elasticsearch 5.5.16 -&gt; 7.6.2 的 client 查询相关的改动：</p><a id="more"></a><p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/202208/20221012135236.png" alt>在 es 5.6.16 版本，用的还是 TransportClient，用 SearchRequestBuilder 对象来构建查询条件。</p><p>而在 es 7.6.2 版本，TransportClient 已标记废弃，使用 RestHighLevelClient，配合 SearchSourceBuilder 与 SearchRequest 对象来构建查询条件。</p><p>另外在 es 7.6.2 版本，type 默认禁止使用。创建索引及索引模板时，不需要指定type（指定会报错）。当写客户端查询代码时，也不需要指定type。</p></div><script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script><script>var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);if (!isMobile) {    var btw = new BTWPlugin();    btw.init({        "id": "vip-container",        "blogId": "15743-1570943068343-906",        "name": "大数据实战演练",        "qrcode": "https://gcore.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",        "keyword": "vip"    });}</script>]]></content>
+    <content type="html"><![CDATA[<div id="vip-container"><p>以下为 Elasticsearch 5.5.16 -&gt; 7.6.2 的 client 查询相关的改动：</p><a id="more"></a><p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/202208/20221012135236.png" alt>在 es 5.6.16 版本，用的还是 TransportClient，用 SearchRequestBuilder 对象来构建查询条件。</p><p>而在 es 7.6.2 版本，TransportClient 已标记废弃，使用 RestHighLevelClient，配合 SearchSourceBuilder 与 SearchRequest 对象来构建查询条件。</p><p>另外在 es 7.6.2 版本，type 默认禁止使用。创建索引及索引模板时，不需要指定type（指定会报错）。当写客户端查询代码时，也不需要指定type。</p><hr><p>Elasticsearch Client 连接官方文档：<a href="https://www.elastic.co/guide/en/elasticsearch/client/index.html" target="_blank" rel="noopener">https://www.elastic.co/guide/en/elasticsearch/client/index.html</a></p></div><script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script><script>var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);if (!isMobile) {    var btw = new BTWPlugin();    btw.init({        "id": "vip-container",        "blogId": "15743-1570943068343-906",        "name": "大数据实战演练",        "qrcode": "https://gcore.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",        "keyword": "vip"    });}</script>]]></content>
     
     <summary type="html">
     
@@ -453,33 +473,6 @@
 &lt;li&gt;&lt;a href=&quot;https://commons.apache.org/proper/commons-compress/javadocs/api-1.20/org/apache/commons/compress/archivers/tar/TarArchiveOutputStream.html&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;https://commons.apache.org/proper/commons-compress/javadocs/api-1.20/org/apache/commons/compress/archivers/tar/TarArchiveOutputStream.html&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;h3 id=&quot;二、pom依赖&quot;&gt;&lt;a href=&quot;#二、pom依赖&quot; class=&quot;headerlink&quot; title=&quot;二、pom依赖&quot;&gt;&lt;/a&gt;二、pom依赖&lt;/h3&gt;
-    
-    </summary>
-    
-      <category term="springboot" scheme="https://841809077.github.io/categories/springboot/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>java正则表达式</title>
-    <link href="https://841809077.github.io/2022/04/02/Spring%20boot/java-regex-expression.html"/>
-    <id>https://841809077.github.io/2022/04/02/Spring boot/java-regex-expression.html</id>
-    <published>2022-04-02T08:54:31.000Z</published>
-    <updated>2022-05-28T07:20:39.086Z</updated>
-    
-    <content type="html"><![CDATA[<div id="vip-container"><h3 id="一、实战"><a href="#一、实战" class="headerlink" title="一、实战"></a>一、实战</h3><h4 id="1、通过正则表达式，获取想要的内容"><a href="#1、通过正则表达式，获取想要的内容" class="headerlink" title="1、通过正则表达式，获取想要的内容"></a>1、通过正则表达式，获取想要的内容</h4><ul><li><code>^</code>：正则表达式开头</li><li><code>\w+</code>：<code>\w</code>表示任意一个字母或数字或下划线，也就是A~Z、a~z、0~9、_ 中任意一个，<code>+</code>表达式至少出现1次，相当于{1,}</li><li><code>\.</code>：表示单纯的小数点</li><li><code>?</code>：表达式匹配0次或1次，相当于{0,1}</li><li><code>\d</code>：任意一个数字，0~9中的任意一个</li><li><code>*</code>：表达式不出现或出现任意次，相当于{0,}</li></ul><a id="more"></a><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Test</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">patternMatchTest</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    String str = <span class="string">"_asda_a1sdjson_asda_a1sd.json"</span>;</span><br><span class="line">    <span class="comment">//        String s = "_asda_a1sd1d.json";</span></span><br><span class="line">    <span class="comment">// 把要匹配的字符串写成正则表达式，然后要提取的字符使用括号括起来</span></span><br><span class="line">    <span class="comment">// 在这里，我们要提取最后一个数字，正则规则就是“一个数字加上大于等于0个非数字再加上结束符”</span></span><br><span class="line">    <span class="comment">//        Pattern pattern = Pattern.compile("(\\w+)[^.*json\\.?\\d+]?$");</span></span><br><span class="line">    Pattern pattern = Pattern.compile(<span class="string">"^(\\w+)\\.json\\.?\\d*$"</span>);</span><br><span class="line">    Matcher matcher = pattern.matcher(str);</span><br><span class="line">    <span class="keyword">if</span> (matcher.find()) &#123;</span><br><span class="line">        System.out.println(matcher.group(<span class="number">1</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>返回结果：</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_asda_a1sdjson_asda_a1sd</span><br></pre></td></tr></table></figure><p>上述表达式也适用于：asd.json.1，执行的结果为：asd</p></div><script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script><script>var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);if (!isMobile) {    var btw = new BTWPlugin();    btw.init({        "id": "vip-container",        "blogId": "15743-1570943068343-906",        "name": "大数据实战演练",        "qrcode": "https://gcore.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",        "keyword": "vip"    });}</script>]]></content>
-    
-    <summary type="html">
-    
-      &lt;h3 id=&quot;一、实战&quot;&gt;&lt;a href=&quot;#一、实战&quot; class=&quot;headerlink&quot; title=&quot;一、实战&quot;&gt;&lt;/a&gt;一、实战&lt;/h3&gt;&lt;h4 id=&quot;1、通过正则表达式，获取想要的内容&quot;&gt;&lt;a href=&quot;#1、通过正则表达式，获取想要的内容&quot; class=&quot;headerlink&quot; title=&quot;1、通过正则表达式，获取想要的内容&quot;&gt;&lt;/a&gt;1、通过正则表达式，获取想要的内容&lt;/h4&gt;&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;^&lt;/code&gt;：正则表达式开头&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;\w+&lt;/code&gt;：&lt;code&gt;\w&lt;/code&gt;表示任意一个字母或数字或下划线，也就是A~Z、a~z、0~9、_ 中任意一个，&lt;code&gt;+&lt;/code&gt;表达式至少出现1次，相当于{1,}&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;\.&lt;/code&gt;：表示单纯的小数点&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;?&lt;/code&gt;：表达式匹配0次或1次，相当于{0,1}&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;\d&lt;/code&gt;：任意一个数字，0~9中的任意一个&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;*&lt;/code&gt;：表达式不出现或出现任意次，相当于{0,}&lt;/li&gt;
-&lt;/ul&gt;
     
     </summary>
     
