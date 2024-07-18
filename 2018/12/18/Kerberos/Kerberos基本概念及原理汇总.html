@@ -1,0 +1,278 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><meta name="keywords" content="Ambari、Java、Kafka、HBase、Elasticsearch、GoLang、Kubernetes、Prometheus"><link rel="stylesheet" type="text/css" href="//fonts.loli.net/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/qrcode.css"><link rel="stylesheet" type="text/css" href="/css/donate.css"><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.4"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.4"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><link rel="stylesheet" type="text/css" href="https://unpkg.com/gitalk/dist/gitalk.css?v=2.0.4"><title>Kerberos基本概念及原理汇总 | ━Start。平常心_</title></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Kerberos基本概念及原理汇总</h1><a id="logo" href="/.">━Start。平常心_</a><p class="description">作者：create17，座右铭：每一个成功人士的背后，必定曾经做出过勇敢而又孤独的决定。放弃不难，但坚持很酷~</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 主页</i></a><a href="/archives/"><i class="fa fa-archive"> 文章时间轴</i></a><a href="/about/"><i class="fa fa-user"> 自我介绍</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">Kerberos基本概念及原理汇总</h1><div class="post-meta"><a href="/2018/12/18/Kerberos/Kerberos基本概念及原理汇总.html#comments" class="comment-count"></a><p><span class="date">2018-12-18</span><span><a href="/categories/Kerberos/" class="category">Kerberos</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><div id="vip-container"><blockquote>
+<p>系统环境</p>
+</blockquote>
+<ul>
+<li>操作系统：CentOS 6 或 CentOS 7</li>
+<li>JDK 版本：1.8.0_151</li>
+<li>Ambari 版本：2.6.1</li>
+<li>HDP 版本：2.6.4.0</li>
+</ul>
+<blockquote>
+<p>扩展链接</p>
+</blockquote>
+<ul>
+<li><a href="https://841809077.github.io/2018/12/18/Kerberos%E5%8E%9F%E7%90%86-%E7%BB%8F%E5%85%B8%E5%AF%B9%E8%AF%9D.html">Kerberos原理–经典对话</a></li>
+<li><a href="https://841809077.github.io/2018/06/11/Kerberos%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE.html">基于ambari的Kerberos安装配置</a></li>
+<li><a href="https://841809077.github.io/2018/12/19/Windows%E6%9C%AC%E5%9C%B0%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AEKerberos%E5%AE%A2%E6%88%B7%E7%AB%AF.html">Windows本地安装配置Kerberos客户端</a></li>
+<li><a href="https://841809077.github.io/2019/01/09/Kerberos%E5%BA%94%E7%94%A8.html">Kerberos应用</a></li>
+<li><a href="https://841809077.github.io/2019/01/18/%E5%9F%BA%E4%BA%8EAmbari%E7%A6%81%E7%94%A8Kerberos.html">基于Ambari禁用Kerberos</a></li>
+<li><a href="https://841809077.github.io/2019/08/16/kerberos-hive-jdbc-java.html">基于Kerberos环境下，使用Java连接操作Hive</a></li>
+</ul>
+<h3 id="一、Kerberos概述"><a href="#一、Kerberos概述" class="headerlink" title="一、Kerberos概述"></a>一、Kerberos概述</h3><a id="more"></a>
+<p>强大的身份验证和建立用户身份是 Hadoop 安全访问的基础。用户需要能够可靠地 “识别” 自己，然后在整个 Hadoop 集群中传播该身份。完成此操作后，这些用户可以访问资源（例如文件或目录）或与集群交互（如运行 MapReduce 作业）。除了用户之外，Hadoop 集群资源本身（例如主机和服务）需要相互进行身份验证，以避免潜在的恶意系统或守护程序 “冒充” 受信任的集群组件来获取数据访问权限。</p>
+<p>Hadoop 使用 <strong>Kerberos</strong> 作为<strong>用户和服务的强身份验证和身份传播</strong>的基础。<strong>Kerberos 是一种计算机网络认证协议，它允许某实体在非安全网络环境下通信，向另一个实体以一种安全的方式证明自己的身份。</strong> Kerberos 是第三方认证机制，其中用户和服务依赖于第三方（Kerberos 服务器）来对彼此进行身份验证。 <strong>Kerberos服务器</strong>本身称为<strong>密钥分发中心或 KDC</strong>。 在较高的层面上，它有三个部分：</p>
+<ul>
+<li>它知道的用户和服务（称为<strong>主体</strong>）及其各自的 Kerberos 密码的数据库。</li>
+<li>一个<strong>认证服务器（Authentication Server，简称 AS）：验证Client端的身份（确定你是身份证上的本人），验证通过就会给一张票证授予票证（Ticket Granting Ticket，简称 TGT）给 Client。</strong></li>
+<li>一个<strong>票据授权服务器（Ticket Granting Server，简称 TGS）：通过 TGT（AS 发送给 Client 的票）获取访问 Server 端的票（Server Ticket，简称 ST）。ST（Service Ticket）也有资料称为 TGS Ticket。</strong></li>
+</ul>
+<p>以平时坐火车举例：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190601/20190829195924.png" alt></p>
+<p>一个用户主要来自AS请求认证。AS <strong>返回</strong> 使用用户主体 的 Kerberos密码加密 的 <strong>TGT</strong> ，该密码仅为用户主体和 AS 所知。用户主体使用其 Kerberos 密码在本地解密TGT，从那时起，直到 <strong>ticket</strong> 到期，用户主体可以使用 TGT 从 TGS 获取服务票据。<strong>服务票证允许委托人访问服务。</strong></p>
+<p>Kerberos 简单来说就是一个用于安全认证第三方协议，它采用了传统的共享密钥的方式，实现了在网络环境不一定保证安全的环境下，client 和 server 之间的通信，适用于 client/server 模型，由 MIT 开发和实现。</p>
+<p>Kerberos 服务是<strong>单点登录</strong>系统，这意味着您对于每个会话只需向服务进行一次自我验证，即可自动保护该会话过程中所有后续事务的安全。</p>
+<p>由于每次解密 TGT 时群集资源（主机或服务）都无法提供密码，因此它们使用称为 <strong>keytab</strong> 的特殊文件，<strong>该文件包含资源主体的身份验证凭据</strong>。 </p>
+<p>Kerberos 服务器控制的<strong>主机，用户和服务集</strong>称为<strong>领域</strong>。</p>
+<h3 id="二、Kerberos验证过程"><a href="#二、Kerberos验证过程" class="headerlink" title="二、Kerberos验证过程"></a>二、Kerberos验证过程</h3><p>Kerberos 验证分为两个阶段：允许进行后续验证的初始验证以及所有后续验证自身。</p>
+<h4 id="1-初始验证：票证授予票证"><a href="#1-初始验证：票证授予票证" class="headerlink" title="1. 初始验证：票证授予票证"></a>1. 初始验证：票证授予票证</h4><p>下图显示了如何进行初始验证：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190101/20190102222444.gif" alt></p>
+<ul>
+<li><p>客户端通过从密钥分发中心(Key Distribution Center, KDC)请票证授予票证(Ticket-Granting Ticket, TGT)开始 Kerberos 会话。此请求通常在登录时自动完成。</p>
+<p>要获取特定服务的其他票证，需要 TGT 。票证授予票证类似于护照。与护照一样，TGT 可标识您的身份并允许您获取多个“签证”，此处的“签证”（票证）不是用于外国，而是用于远程计算机或网络服务。与护照和签证一样，票证授予票证和其他各种票证具有有限的生命周期。区别在于基于 Kerberos 的命令会通知您拥有护照并为您取得签证。您不必亲自执行该事务。</p>
+<p>与票证授予票证类似的另一种情况是可以在四个不同的滑雪场使用的三天滑雪入场卷。只要入场券未到期，您就可以在决定要去的任意一个滑雪场出示入场卷，并获取该滑雪场提供的缆车票。获取缆车票后，即可在该滑雪场随意滑雪。如果第二天去另一个滑雪场，您需要再次出示入场卷，并获取新滑雪场的另一张缆车票。区别在于基于 Kerberos 的命令会通知您拥有周末滑雪入场卷，并会为您取得缆车票。因此，您不必亲自执行该事务。</p>
+</li>
+<li><p>KDC 可创建 TGT ，并采用加密形式将其发送回客户端。客户端使用其口令来解密 TGT 。</p>
+</li>
+<li><p>拥有有效的 TGT，只要该 TGT 未到期，客户机便可以请求所有类型的网络操作（如 rlogin 或 telnet）的票证。此票证的有效期通常为一天。每次客户端执行唯一的网络操作时，都将从 KDC 请求该操作的票证。</p>
+</li>
+</ul>
+<h4 id="2-后续Kerberos验证"><a href="#2-后续Kerberos验证" class="headerlink" title="2. 后续Kerberos验证"></a>2. 后续Kerberos验证</h4><p>客户机收到初始验证后，每个后续验证都按下图所示的模式进行。</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190101/20190102223226.gif" alt></p>
+<ul>
+<li><p>客户机通过向 KDC 发送其 TGT 作为其身份证明，从 KDC 请求特定服务（例如，远程登录到另一台计算机）的票证。</p>
+</li>
+<li><p>KDC 将该特定服务的票证发送到客户机。</p>
+<p>例如，假定用户 <code>joe</code> 要访问已通过要求的 <code>krb5</code> 验证共享的 NFS 文件系统。 由于该用户已经通过了验证（即，该用户已经拥有票证授予票证），因此当其尝试访问文件时，NFS 客户机系统将自动透明地从 KDC 获取 NFS 服务的票证。</p>
+<p>例如，假定用户 <code>joe</code> 在服务器 <code>boston</code> 上使用 rlogin。由于该用户已经通过了验证（即，该用户已经拥有票证授予票证），所以在运行 rlogin 命令时，该用户将自动透明地获取票证。该用户使用此票证可随时远程登录到 <code>boston</code>，直到票证到期为止。如果 <code>joe</code> 要远程登录到计算机 <code>denver</code>，则需要按照步骤 1 获取另一个票证。</p>
+</li>
+<li><p>客户机将票证发送到服务器。</p>
+<p>使用 NFS 服务时，NFS 客户机会自动透明地将 NFS 服务的票证发送到 NFS 服务器。</p>
+</li>
+<li><p>服务器允许此客户机进行访问。</p>
+</li>
+</ul>
+<p>从这些步骤来看，服务器似乎并未与 KDC 通信。但服务器实际上与 KDC 进行了通信，并向 KDC 注册了其自身，正如第一台客户机所执行的操作。为简单起见，该部分已省略。</p>
+<p><strong>关于 Kerberos 更多的原理讲解可参考以下链接，对理解 Kerberos 原理也很有帮助：</strong></p>
+<ul>
+<li><a href="https://www.zhihu.com/question/22177404/answer/492680179" target="_blank" rel="noopener">https://www.zhihu.com/question/22177404/answer/492680179</a></li>
+<li><a href="https://www.anquanke.com/post/id/171552#h2-2" target="_blank" rel="noopener">https://www.anquanke.com/post/id/171552#h2-2</a></li>
+</ul>
+<h3 id="三、Kerberos基本概念"><a href="#三、Kerberos基本概念" class="headerlink" title="三、Kerberos基本概念"></a>三、Kerberos基本概念</h3><h4 id="1-Key-Distribution-Center-or-KDC"><a href="#1-Key-Distribution-Center-or-KDC" class="headerlink" title="1. Key Distribution Center, or KDC"></a>1. Key Distribution Center, or KDC</h4><p>在启用Kerberos的环境中进行身份验证的受信任源。</p>
+<h4 id="2-Kerberos-KDC-Server"><a href="#2-Kerberos-KDC-Server" class="headerlink" title="2. Kerberos KDC Server"></a>2. Kerberos KDC Server</h4><p>作为密钥分发中心（KDC）的计算机或服务器。</p>
+<h4 id="3-Kerberos-Client"><a href="#3-Kerberos-Client" class="headerlink" title="3. Kerberos Client"></a>3. Kerberos Client</h4><p>集群中针对KDC进行身份验证的任何计算机。</p>
+<h4 id="4-KDC-Admin-Account"><a href="#4-KDC-Admin-Account" class="headerlink" title="4. KDC Admin Account"></a>4. KDC Admin Account</h4><p>Ambari用于在KDC中创建主体并生成密钥表的管理帐户。</p>
+<h4 id="5-Principal"><a href="#5-Principal" class="headerlink" title="5. Principal"></a>5. Principal</h4><p>Kerberos principal（又称为<strong>主体</strong>）用于在kerberos加密系统中标记一个唯一的身份。<strong>主体</strong>可以是<strong>用户</strong>（如<code>joe</code>）或<strong>服务</strong>（如<code>namenode</code>或<code>hive</code>）。</p>
+<p>根据约定，主体名称分为三个部分：<strong>主名称、实例和领域</strong>。例如，典型的Kerberos主体可以是<a href="mailto:`joe/admin@EXAMPLE.COM" target="_blank" rel="noopener">`joe/admin@EXAMPLE.COM</a>`。在本实例中：</p>
+<ul>
+<li><p><code>joe</code>是主名称。主名称可以是此处所示的用户名或namenode等服务。</p>
+</li>
+<li><p><code>admin</code>是实例。对于用户主体，实例是可选的；但对于服务主体，实例则是必需的。例如，如果用户 <code>joe</code> 有时充当系统管理员，则他可以使用 <code>joe/admin</code> 将其自身与平时的用户身份区分开来。同样，如果 <code>joe</code> 在两台不同的主机上拥有帐户，则他可以使用两个具有不同实例的主体名称，例如 <code>joe/node1.example.com</code> 和 <code>joe/node2.example.com</code>。请注意，Kerberos 服务会将 <code>joe</code> 和 <code>joe/admin</code> 视为两个完全不同的主体。</p>
+<p>对于服务主体，实例是全限定主机名。例如，<code>node1.example.com</code>就是这种实例。</p>
+</li>
+<li><p><code>EXAMPLE.COM</code>是Kerberos领域。领域将在下一小节中介绍。</p>
+</li>
+</ul>
+<p>Hadoop中的<strong>每个服务和子服务</strong>都必须有自己的<strong>主体</strong>。给定领域中的<strong>主体名称</strong>由<strong>主名称</strong>和<strong>实例名称</strong>组成，在这种情况下，<strong>实例名称</strong>是运行该服务的主机的<strong>FQDN</strong>。由于服务未使用密码登录以获取其票证，因此其主体的身份验证凭据存储在<code>keytab</code>密钥表文件中，该文件从Kerberos数据库中提取并本地存储在服务组件主机上具有服务主体的安全目录中。比如<code>NameNode</code>组件在<code>node1.example.com</code>主机上，启用<code>kerberos</code>之后，会自动生成<code>nn.service.keytab</code>文件，并存储在<code>/etc/security/keytabs</code>目录下，用户所有者是<code>hdfs:hadoop</code>，权限为<code>400</code>，如图所示：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190101/20190103220905.png" alt></p>
+<p>ambari 和 hadoop service 的 principals 都存储 Kerberos KDC 中，如下图所示：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190101/20190103221140.png" alt></p>
+<p><strong>Principal和Keytab命名约定</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>惯例</strong></th>
+<th><strong>示例</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Principals</td>
+<td><a href="mailto:$service_component_name/$FQDN@EXAMPLE.COM" target="_blank" rel="noopener">$service_component_name/$FQDN@EXAMPLE.COM</a></td>
+<td><a href="mailto:nn/node1.example.com@EXAMPLE.COM" target="_blank" rel="noopener">nn/node1.example.com@EXAMPLE.COM</a></td>
+</tr>
+<tr>
+<td>Keytabs</td>
+<td>$service_component_abbreviation.service.keytab</td>
+<td>/etc/security/keytabs/nn.service.keytab</td>
+</tr>
+</tbody>
+</table>
+<p>请注意前面的示例中每个服务主体的主名称。这些主要名称（例如nn或hive）分别代表NameNode或Hive服务。每个主要名称都附加了<strong>实例名称，即运行它的主机的FQDN</strong>。此约定为在多个主机（如DataNodes和NodeManager）上运行的服务提供唯一的主体名称。添加主机名用于区分，例如，来自DataNode A的请求与来自DataNode B的请求。这一点很重要，原因如下：</p>
+<ul>
+<li>一个 DataNode 的受损 Kerberos 凭据不会自动导致所有 DataNode 的 Kerberos 凭据受损。</li>
+<li>如果多个 DataNode 具有完全相同的主体并同时连接到 NameNode ，并且正在发送的 Kerberos 身份验证器恰好具有相同的时间戳，则身份验证将作为重播请求被拒绝。</li>
+</ul>
+<p><strong>Ambari Principals</strong></p>
+<p>除了 Hadoop 服务主体之外，Ambari 本身还需要一组 Ambari Principal 来执行服务“<strong>冒烟</strong>”检查，执行警报运行状况检查以及从集群组件检索指标。 Ambari Principals 的 Keytab 文件驻留在每个群集主机上，就像服务主体的 keytab 文件一样。</p>
+<table>
+<thead>
+<tr>
+<th><strong>Ambari Principals</strong></th>
+<th><strong>描述</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Smoke and “Headless” Service users</td>
+<td>Ambari 用于执行服务“冒烟”检查并运行警报健康检查。</td>
+</tr>
+<tr>
+<td>Ambari Server user</td>
+<td>为 Kerberos 启用集群时，组件 REST 端点（例如 YARN ATS 组件）需要 SPNEGO 身份验证。 Ambari Server 需要访问这些 API 并需要Kerberos主体才能通过 SPNEGO 针对这些 API 进行身份验证。</td>
+</tr>
+</tbody>
+</table>
+<h4 id="6-realms-name"><a href="#6-realms-name" class="headerlink" title="6. realms name"></a>6. realms name</h4><p>包含 KDC 和许多客户端的 Kerberos 网络，类似于域，俗称为领域。</p>
+<h4 id="7-keytab"><a href="#7-keytab" class="headerlink" title="7. keytab"></a>7. keytab</h4><p>keytab 是包含 principals 和加密 principal key 的文件。</p>
+<p>keytab 文件对于每个 host 是唯一的，因为 key 中包含 hostname 。keytab 文件用于不需要人工交互和保存纯文本密码，实现到 kerberos 上验证一个主机上的 principal 。</p>
+<p>因为服务器上可以访问 keytab 文件即可以以 principal 的身份通过 kerberos 的认证，所以，keytab 文件应该<strong>被妥善保存，应该只有少数的用户可以访问。</strong></p>
+<h4 id="8-ticket（票证）"><a href="#8-ticket（票证）" class="headerlink" title="8. ticket（票证）"></a>8. ticket（票证）</h4><p>ticket 是一种信息包，用于将用户身份安全地传递到服务器或服务。一个票证仅对一台客户机以及某台特定服务器上的一项特殊服务有效。票证包含以下内容：</p>
+<ul>
+<li>服务的主体名称</li>
+<li>用户的主体名称</li>
+<li>用户主机的 IP 地址</li>
+<li>时间标记</li>
+<li>定义票证生命周期的值</li>
+<li>会话密钥的副本</li>
+</ul>
+<p>所有此类数据都使用服务器的服务密钥进行加密。颁发票证之后，可重用票证直到其到期为止。</p>
+<h4 id="9-credential（凭证）"><a href="#9-credential（凭证）" class="headerlink" title="9. credential（凭证）"></a>9. credential（凭证）</h4><p>是一种信息包，其中包含票证和匹配的会话密钥。凭证使用发出请求的主体的密钥进行加密。通常，KDC 会生成凭证以响应客户机的票证请求。</p>
+<h4 id="10-authenticator（验证者）"><a href="#10-authenticator（验证者）" class="headerlink" title="10. authenticator（验证者）"></a>10. authenticator（验证者）</h4><p>是服务器用于验证客户机用户主体的信息。 验证者包含用户的主体名称、时间标记和其他数据。 与票证不同，验证者只能使用一次，通常在请求访问服务时使用。 验证者使用客户机和服务器共享的会话密钥进行加密。 通常，客户机会创建验证者，并将其与服务器或服务的票证一同发送，以便向服务器或服务进行验证。</p>
+<h3 id="四、票证生命周期"><a href="#四、票证生命周期" class="headerlink" title="四、票证生命周期"></a>四、票证生命周期</h3><p>每当主体获取包括票证授予票证 (Ticket–Granting Ticket, TGT) 在内的票证时，可以通过 kinit 的 <strong>-l</strong> 选项指定的生命周期值，前提是使用 kinit 获取票证。缺省情况下，kinit 使用最长生命周期值。kdc.conf 文件中指定的最长生命周期值 (max_life)。</p>
+<p>可通过 kinit 的 <strong>-r</strong> 选项指定的可更新生命周期值，前提是使用 kinit 获取或更新票证。kdc.conf 文件中指定的最长可更新生命周期值 (max_renewable_life)。</p>
+<h3 id="五、Kerberos主体名称"><a href="#五、Kerberos主体名称" class="headerlink" title="五、Kerberos主体名称"></a>五、Kerberos主体名称</h3><p>每个票证都使用主体名称进行标识。主体名称可以标识用户或服务。以下是一些主体名称的示例：</p>
+<table>
+<thead>
+<tr>
+<th>主体名称</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="mailto:username@EXAMPLE.COM" target="_blank" rel="noopener">username@EXAMPLE.COM</a></td>
+<td>用户的主体</td>
+</tr>
+<tr>
+<td><a href="mailto:username/admin@EXAMPLE.COM" target="_blank" rel="noopener">username/admin@EXAMPLE.COM</a></td>
+<td>admin 主体，可用于管理 KDC 数据库。</td>
+</tr>
+<tr>
+<td><a href="mailto:K/M@EXAMPLE.COM" target="_blank" rel="noopener">K/M@EXAMPLE.COM</a></td>
+<td>主密钥名称主体。一个主密钥名称主体可与每个<br>主 KDC 关联。</td>
+</tr>
+<tr>
+<td><a href="mailto:krbtgt/EXAMPLE.COM@EXAMPLE.COM" target="_blank" rel="noopener">krbtgt/EXAMPLE.COM@EXAMPLE.COM</a></td>
+<td>生成票证授予票证时使用的主体。</td>
+</tr>
+<tr>
+<td><a href="mailto:kadmin/host1.example.com@EXAMPLE.COM" target="_blank" rel="noopener">kadmin/host1.example.com@EXAMPLE.COM</a></td>
+<td>允许使用 kadmind 访问 KDC 的主 KDC 服务器的主体。</td>
+</tr>
+<tr>
+<td><a href="mailto:ambari-qa-xxx@EXAMPLE.COM" target="_blank" rel="noopener">ambari-qa-xxx@EXAMPLE.COM</a></td>
+<td>Ambari 用于执行服务“冒烟”检查并运行警报健康检查。</td>
+</tr>
+<tr>
+<td><a href="mailto:HTTP/host1.example.com@EXAMPLE.COM" target="_blank" rel="noopener">HTTP/host1.example.com@EXAMPLE.COM</a></td>
+<td>用于访问 Hadoop Web UI 时用到的 principal</td>
+</tr>
+</tbody>
+</table>
+<h3 id="六、注意事项"><a href="#六、注意事项" class="headerlink" title="六、注意事项"></a>六、注意事项</h3><h4 id="1-时钟同步"><a href="#1-时钟同步" class="headerlink" title="1. 时钟同步"></a>1. 时钟同步</h4><p>所有参与 Kerberos 验证系统的主机都必须在指定的最长时间（称为<strong>时钟相位差</strong>）内同步其内部时钟。针对这一要求，需要进行另一种 Kerberos 安全检查。如果任意两台参与主机之间的时间偏差超过了时钟相位差，则客户机请求会被拒绝。</p>
+<p>时钟相位差的最大缺省值为 300 秒（5 分钟）。出于安全原因，不要将时钟相位差增大到超过 300 秒。</p>
+<p>时钟同步设置方法：<a href="https://841809077.github.io/2018/10/31/Linux%20NTP%E6%97%B6%E9%92%9F%E5%90%8C%E6%AD%A5.html">点我</a></p>
+<h3 id="七、Kerberos的优点和不足"><a href="#七、Kerberos的优点和不足" class="headerlink" title="七、Kerberos的优点和不足"></a>七、Kerberos的优点和不足</h3><h4 id="1-优点"><a href="#1-优点" class="headerlink" title="1. 优点"></a>1. 优点</h4><blockquote>
+<p>较高的Performance</p>
+</blockquote>
+<p>虽然我们一再地说Kerberos是一个涉及到3方的认证过程：Client、Server、KDC。但是一旦Client获得用过访问某个Server的Ticket，该Server就能根据这个Ticket实现对Client的验证，而无须KDC的再次参与。和传统的基于Windows NT 4.0的每个完全依赖Trusted Third Party的NTLM比较，具有较大的性能提升。</p>
+<blockquote>
+<p>实现了双向验证（Mutual Authentication）</p>
+</blockquote>
+<p>传统的NTLM认证基于这样一个前提：Client访问的远程的Service是可信的、无需对于进行验证，所以NTLM不曾提供双向验证的功能。这显然有点理想主义，为此Kerberos弥补了这个不足：Client在访问Server的资源之前，可以要求对Server的身份执行认证。</p>
+<blockquote>
+<p>对Delegation的支持</p>
+</blockquote>
+<p>Impersonation和Delegation是一个分布式环境中两个重要的功能。Impersonation允许Server在本地使用Logon 的Account执行某些操作，Delegation需用Server将logon的Account带入到另过一个Context执行相应的操作。NTLM仅对Impersonation提供支持，而Kerberos通过一种双向的、可传递的（Mutual 、Transitive）信任模式实现了对Delegation的支持。</p>
+<blockquote>
+<p>互操作性（Interoperability）</p>
+</blockquote>
+<p>Kerberos最初由MIT首创，现在已经成为一行被广泛接受的标准。所以对于不同的平台可以进行广泛的互操作。</p>
+<h4 id="2-不足"><a href="#2-不足" class="headerlink" title="2. 不足"></a>2. 不足</h4><ul>
+<li><p>Kerberos身份认证采用的是对称加密机制，加密和解密使用的是相同的密钥，交换密钥时的安全性比较难以保障。</p>
+</li>
+<li><p>Kerberos服务器与用户共享的服务会话密钥是用户的口令字，服务器在响应时不需验证用户的真实性，而是直接假设只有合法用户拥有了该口令字。如果攻击者截获了响应消息，就很容易形成密码攻击。</p>
+</li>
+<li><p>Kerberos中的AS（身份认证服务）和TGS是集中式管理，容易形成瓶颈，系统的性能和安全也严重依赖于AS和TGS的性能和安全。在AS和TGS前应该有访问控制，以增强AS和TGS的安全。</p>
+</li>
+<li><p>随用户数量增加，密钥管理较复杂。Kerberos拥有每个用户的口令字的散列值，AS与TGS负责户间通信密钥的分配。假设有n个用户想同时通信，则需要维护n×（n-1）/2个密钥。</p>
+</li>
+</ul>
+<h3 id="八、总结"><a href="#八、总结" class="headerlink" title="八、总结"></a>八、总结</h3><p>本篇文章主要从<strong>Kerberos概述、验证过程的描述、基本概念的解释、Kerberos注意事项及优缺点</strong>的方面来介绍Kerberos的，接下来会出一个<strong>如何在Kerberos环境下使用Hadoop服务</strong>的文章教程，让我们一起期待吧，哈哈</p>
+<blockquote>
+<p>扩展链接</p>
+</blockquote>
+<ul>
+<li><a href="https://841809077.github.io/2018/12/18/Kerberos%E5%8E%9F%E7%90%86-%E7%BB%8F%E5%85%B8%E5%AF%B9%E8%AF%9D.html">Kerberos原理–经典对话</a></li>
+<li><a href="https://841809077.github.io/2018/06/11/Kerberos%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE.html">基于ambari的Kerberos安装配置</a></li>
+<li><a href="https://841809077.github.io/2018/12/19/Windows%E6%9C%AC%E5%9C%B0%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AEKerberos%E5%AE%A2%E6%88%B7%E7%AB%AF.html">Windows本地安装配置Kerberos客户端</a></li>
+<li><a href="https://841809077.github.io/2019/01/09/Kerberos%E5%BA%94%E7%94%A8.html">Kerberos应用</a></li>
+<li><a href="https://841809077.github.io/2019/01/18/%E5%9F%BA%E4%BA%8EAmbari%E7%A6%81%E7%94%A8Kerberos.html">基于Ambari禁用Kerberos</a></li>
+<li><a href="https://841809077.github.io/2019/08/16/kerberos-hive-jdbc-java.html">基于Kerberos环境下，使用Java连接操作Hive</a></li>
+</ul>
+<blockquote>
+<p>参考资料</p>
+</blockquote>
+<ul>
+<li><a href="https://docs.oracle.com/cd/E19253-01/819-7061/6n91j2vak/index.html" target="_blank" rel="noopener">https://docs.oracle.com/cd/E19253-01/819-7061/6n91j2vak/index.html</a></li>
+<li><a href="https://www.zhihu.com/question/22177404/answer/492680179" target="_blank" rel="noopener">https://www.zhihu.com/question/22177404/answer/492680179</a></li>
+<li><a href="https://www.anquanke.com/post/id/171552#h2-2" target="_blank" rel="noopener">https://www.anquanke.com/post/id/171552#h2-2</a></li>
+<li><p><a href="https://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.6.4/bk_security/content/kerberos_principals.html" target="_blank" rel="noopener">https://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.6.4/bk_security/content/kerberos_principals.html</a></p>
+</li>
+<li><p><a href="https://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.6.5/bk_security/content/setting_up_kerberos_authentication_for_non_ambari_clusters.html" target="_blank" rel="noopener">https://docs.hortonworks.com/HDPDocuments/HDP2/HDP-2.6.5/bk_security/content/setting_up_kerberos_authentication_for_non_ambari_clusters.html</a></p>
+</li>
+</ul>
+<hr>
+</div>
+
+			<script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+			<script>
+			var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);
+			if (!isMobile) {
+			    var btw = new BTWPlugin();
+			    btw.init({
+			        "id": "vip-container",
+			        "blogId": "15743-1570943068343-906",
+			        "name": "大数据实战演练",
+			        "qrcode": "https://gcore.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",
+			        "keyword": "vip"
+			    });
+			}
+			</script>
+		</div><strong>再见</strong><br><hr class="bottom_msg"><br><h3><a href="#点关注，不迷路" title="点关注，不迷路" class="headerlink">点关注，不迷路</a></h3><br><p>好了各位，以上就是这篇文章的全部内容了，能看到这里的人呀，都是<strong>人才</strong>。</p><br><p><strong>白嫖不好，创作不易。</strong>各位的支持和认可，就是我创作的最大动力，我们下篇文章见！</p><br><p>如果本篇博客有任何错误，请批评指教，不胜感激 ！</p><br><div class="post-qrcode"><div class="qrcode_bar center"><img src="/img/qrcode.png" title="扫一扫交个朋友" alt="微信公众号二维码" width="100%"></div></div><script type="text/javascript" src="/js/jquery.js?v=2.0.4" async></script><div class="post-donate"><div id="donate_board" class="donate_bar center"><a id="btn_donate" href="javascript:;" title="打赏" class="btn_donate"></a><div class="donate_txt"> &uarr;<br>坚持原创技术分享，您的支持将鼓励我继续创作！<br></div></div><div id="donate_guide" class="donate_bar center hidden pay"><img src="/img/weChatMoney.png" id="wechatpay" title="微信打赏" alt="微信打赏"><img src="/img/alipayMoney.png" id="alipay" title="支付宝打赏" alt="支付宝打赏"></div><script type="text/javascript">document.getElementById('btn_donate').onclick = function(){
+    // $('#donate_board').addClass('hidden');
+    // $('#donate_guide').removeClass('hidden');
+    $('#donate_guide').toggle();
+}</script></div><script type="text/javascript" src="/js/jquery.fancybox.js?v=2.0.4" async></script><script type="text/javascript" src="/js/wrapImage.js?v=2.0.4" async></script><div class="post-copyright"><blockquote><p>原文作者: create17</p><p>原文链接: <a href="https://841809077.github.io/2018/12/18/Kerberos/Kerberos基本概念及原理汇总.html">https://841809077.github.io/2018/12/18/Kerberos/Kerberos基本概念及原理汇总.html</a></p><p>版权声明: 转载请注明出处(码字不易，请保留作者署名及链接，谢谢配合！)</p></blockquote></div><div class="tags"></div><div class="post-share"><div class="social-share"><span>分享到:</span></div></div><div class="post-nav"><a href="/2018/12/19/Kerberos/Windows本地安装配置Kerberos客户端.html" class="pre">Windows本地安装配置Kerberos客户端</a><a href="/2018/12/18/Kerberos/Kerberos原理-经典对话.html" class="next">Kerberos原理--经典对话</a></div><div id="comments"><div id="container"><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js?v=2.0.4"></script><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=2.0.4"></script><script>var gitalk = new Gitalk({
+  clientID: '7ff674ca1078ead070aa',
+  clientSecret: 'f176d4d73417fd566e3e0ac6319aeb4708f4099d',
+  repo: '841809077.github.io',
+  owner: '841809077',
+  admin: ['841809077'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false,
+  language: 'zh-CN',
+  pagerDirection: 'last'
+})
+gitalk.render('container')</script></div></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#一、Kerberos概述"><span class="toc-text">一、Kerberos概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#二、Kerberos验证过程"><span class="toc-text">二、Kerberos验证过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-初始验证：票证授予票证"><span class="toc-text">1. 初始验证：票证授予票证</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-后续Kerberos验证"><span class="toc-text">2. 后续Kerberos验证</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#三、Kerberos基本概念"><span class="toc-text">三、Kerberos基本概念</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Key-Distribution-Center-or-KDC"><span class="toc-text">1. Key Distribution Center, or KDC</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-Kerberos-KDC-Server"><span class="toc-text">2. Kerberos KDC Server</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-Kerberos-Client"><span class="toc-text">3. Kerberos Client</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-KDC-Admin-Account"><span class="toc-text">4. KDC Admin Account</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-Principal"><span class="toc-text">5. Principal</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#6-realms-name"><span class="toc-text">6. realms name</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#7-keytab"><span class="toc-text">7. keytab</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#8-ticket（票证）"><span class="toc-text">8. ticket（票证）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#9-credential（凭证）"><span class="toc-text">9. credential（凭证）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#10-authenticator（验证者）"><span class="toc-text">10. authenticator（验证者）</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#四、票证生命周期"><span class="toc-text">四、票证生命周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#五、Kerberos主体名称"><span class="toc-text">五、Kerberos主体名称</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#六、注意事项"><span class="toc-text">六、注意事项</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-时钟同步"><span class="toc-text">1. 时钟同步</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#七、Kerberos的优点和不足"><span class="toc-text">七、Kerberos的优点和不足</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-优点"><span class="toc-text">1. 优点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-不足"><span class="toc-text">2. 不足</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#八、总结"><span class="toc-text">八、总结</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2023/03/13/ELK/Elasticsearch/API/es-query-dsl.html">Elasticsearch Query DSL 查询</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/11/09/ELK/Elasticsearch/疑难问题/fielddata-data-too-large.html">Elasticsearch查询报错：FIELDDATA Data is too large</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/12/ELK/Elasticsearch/Client/elasticsearch-bool-query.html">Elasticsearch bool复合查询</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/12/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-client-query.html">Elasticsearch-7.6.2客户端查询指南</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/11/Prometheus/prometheus-query-functions.html">Prometheus常用查询函数梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/07/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-xpack-java-client.html">Elasticsearch-7.6.2部署并开启xpack，java客户端明文密码连接指南</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/30/Prometheus/Exporter/rabbitmq-exporter.html">RabbitMQ exporter部署</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/20/GoLang/go-time-usage.html">golang 时间相关操作集合</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/08/12/Ambari/运维相关/hdp-copmonment-version.html">如何查看HDP各组件版本信息，两种办法</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/07/28/Docker/docker-faq.html">docker 常见问题解答汇总</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-weixin"> 微信公众号</i></div><img width="100%" height="100%" title="微信扫一扫，订阅更多技术干货" alt="啊哦，图片丢失了... 加我微信: create17_，联系我吧" src="/img/prcode_square.jpg"/></div><div class="widget"><div class="widget-title"><i class="iconfont2 iconscan"> 加我好友（与我互动）</i></div><div class="img-po"><img width="100%" height="100%" title="微信扫一扫，欢迎与我交流！" alt="微信号: create17_，欢迎与我交流！" src="/img/wechat_code.jpg"/></div></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AlertManager/">AlertManager</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Ambari/">Ambari</a><span class="category-list-count">33</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK/">ELK</a><span class="category-list-count">21</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/EmberJS/">EmberJS</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/FastDFS/">FastDFS</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Flume/">Flume</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/GoLang/">GoLang</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HBase/">HBase</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HDFS/">HDFS</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HUE/">HUE</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Hadoop/">Hadoop</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JavaScript/">JavaScript</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java工具类/">Java工具类</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/K8s/">K8s</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kafka/">Kafka</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kerberos/">Kerberos</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kettle/">Kettle</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kylin/">Kylin</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/PostgreSQL/">PostgreSQL</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Prometheus/">Prometheus</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Python/">Python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scala/">Scala</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scrapy爬虫框架/">Scrapy爬虫框架</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Solr/">Solr</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spark/">Spark</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Sqoop/">Sqoop</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Zookeeper/">Zookeeper</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go语言/">go语言</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo搭建个人博客/">hexo搭建个人博客</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">22</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/yarn/">yarn</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/你有酒我有故事/">你有酒我有故事</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/大数据/">大数据</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/开发工具/">开发工具</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/浏览器插件/">浏览器插件</a><span class="category-list-count">1</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/hadoop服务组件/" style="font-size: 15px;">hadoop服务组件</a> <a href="/tags/Hadoop服务组件/" style="font-size: 15px;">Hadoop服务组件</a> <a href="/tags/security/" style="font-size: 15px;">security</a> <a href="/tags/ntp/" style="font-size: 15px;">ntp</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Kylin/" style="font-size: 15px;">Kylin</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/python实战/" style="font-size: 15px;">python实战</a> <a href="/tags/idea/" style="font-size: 15px;">idea</a> <a href="/tags/ambari/" style="font-size: 15px;">ambari</a> <a href="/tags/自定义服务/" style="font-size: 15px;">自定义服务</a> <a href="/tags/书籍福利/" style="font-size: 15px;">书籍福利</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">八月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">九月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">六月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="https://blog.csdn.net/CREATE_17" title="CSDN - CREATE_17" target="_blank">CSDN - CREATE_17</a><ul></ul><a href="https://www.iteblog.com/" title="过往记忆 的大数据博客" target="_blank">过往记忆 的大数据博客</a><ul></ul><a href="https://shirukai.github.io/" title="Rukai Shi 的大数据博客" target="_blank">Rukai Shi 的大数据博客</a><ul></ul><a href="https://liunaijie.github.io/" title="蒙娜丽莎法师" target="_blank">蒙娜丽莎法师</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">网站地图</a> |  <a href="/atom.xml">订阅本站</a> |  <a href="/about/">联系博主</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次，本站总访客数:<i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>人</p><p><span> Copyright &copy;<a href="/." rel="nofollow">create17.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script type="text/javascript" src="/js/search.json.js?v=2.0.4"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.4" async></script><link rel="stylesheet" type="text/css" href="/share/css/share.css"><script type="text/javascript" src="/share/js/social-share.js" charset="utf-8"></script><script type="text/javascript" src="/share/js/qrcode.js" charset="utf-8"></script></body></html>

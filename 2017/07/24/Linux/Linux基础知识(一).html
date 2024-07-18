@@ -1,0 +1,289 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><meta name="keywords" content="Ambari、Java、Kafka、HBase、Elasticsearch、GoLang、Kubernetes、Prometheus"><link rel="stylesheet" type="text/css" href="//fonts.loli.net/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/qrcode.css"><link rel="stylesheet" type="text/css" href="/css/donate.css"><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.4"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.4"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><link rel="stylesheet" type="text/css" href="https://unpkg.com/gitalk/dist/gitalk.css?v=2.0.4"><title>Linux基础知识(一) | ━Start。平常心_</title></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Linux基础知识(一)</h1><a id="logo" href="/.">━Start。平常心_</a><p class="description">作者：create17，座右铭：每一个成功人士的背后，必定曾经做出过勇敢而又孤独的决定。放弃不难，但坚持很酷~</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 主页</i></a><a href="/archives/"><i class="fa fa-archive"> 文章时间轴</i></a><a href="/about/"><i class="fa fa-user"> 自我介绍</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">Linux基础知识(一)</h1><div class="post-meta"><a href="/2017/07/24/Linux/Linux基础知识(一).html#comments" class="comment-count"></a><p><span class="date">2017-07-24</span><span><a href="/categories/Linux/" class="category">Linux</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><div id="vip-container"><h2 id="vi的几种模式"><a href="#vi的几种模式" class="headerlink" title="vi的几种模式"></a>vi的几种模式</h2><ul>
+<li>一般模式</li>
+<li>编辑模式</li>
+<li>命令行模式</li>
+</ul>
+<a id="more"></a>
+<h1 id="vim编辑器的使用"><a href="#vim编辑器的使用" class="headerlink" title="vim编辑器的使用"></a>vim编辑器的使用</h1><h2 id="vim程序编辑器-插入模式"><a href="#vim程序编辑器-插入模式" class="headerlink" title="vim程序编辑器-插入模式"></a>vim程序编辑器-插入模式</h2><ul>
+<li>i：在光标前插入</li>
+</ul>
+<h2 id="末行模式"><a href="#末行模式" class="headerlink" title="末行模式"></a>末行模式</h2><ul>
+<li>保存：:w</li>
+<li>强制保存：:w!</li>
+<li>退出：:q</li>
+<li>强制退出：:q!</li>
+<li>保存并退出：:wq 或者 ZZ</li>
+<li>另存为filename文件：:w[filename]</li>
+</ul>
+<h2 id="光标移动"><a href="#光标移动" class="headerlink" title="光标移动"></a>光标移动</h2><ul>
+<li>屏幕向下移动一页：[ctrl]+f 或 [PgDn]</li>
+<li>屏幕向上移动一页：[ctrl]+b 或 [PgUp]</li>
+<li>屏幕向下移动半页：[ctrl]+d</li>
+<li>屏幕向上移动半页：[ctrl]+u</li>
+<li>光标移至行首：0（数字）、^或[Home]</li>
+<li>光标移至行尾：$或[End]</li>
+<li>光标移至文件的最后一行：G</li>
+<li>光标移至文件的第一行：gg</li>
+<li>光标向下移动n行：n+回车</li>
+<li>移动到58行 :58</li>
+<li>光标向右移动n个字符：n+空格</li>
+</ul>
+<h2 id="查找与替换"><a href="#查找与替换" class="headerlink" title="查找与替换"></a>查找与替换</h2><ul>
+<li>向下查找一个名称为word的字符串 ：/word</li>
+<li>向上查找一个名称为word的字符串 ：?word</li>
+<li>重复前一个查找操作 ：n</li>
+<li>“反向”进行前一个查找操作 ：N</li>
+<li>将n1与n2行之间的字符串word1替换为word2：  :n1,n2s/word1/word2/g</li>
+</ul>
+<h2 id="删除、粘贴与复制"><a href="#删除、粘贴与复制" class="headerlink" title="删除、粘贴与复制"></a>删除、粘贴与复制</h2><ul>
+<li>复制光标所在行：yy</li>
+<li>删除光标所在行：dd</li>
+<li>删除一块光标下几行区域：Ndd</li>
+<li>将已复制的数据在光标所在行的下一行粘贴：p（小写）</li>
+<li>将已复制的数据在光标所在行的上一行粘贴：P（大写）</li>
+<li>前删：x （相当于Backspace）</li>
+<li>后删：X （相当于delete）</li>
+</ul>
+<h2 id="复制粘贴文件：cp-filename"><a href="#复制粘贴文件：cp-filename" class="headerlink" title="复制粘贴文件：cp filename"></a>复制粘贴文件：cp filename</h2><ul>
+<li>把整个目录复制到另一个目录</li>
+<li>cp -r 源目录 指定目录</li>
+<li>例子：cp -r novel-manage /root</li>
+</ul>
+<h2 id="文件移动-mv"><a href="#文件移动-mv" class="headerlink" title="文件移动 mv"></a>文件移动 mv</h2><ul>
+<li>mv 文件名/文件目录 指定文件目录</li>
+</ul>
+<h2 id="文件重命名"><a href="#文件重命名" class="headerlink" title="文件重命名"></a>文件重命名</h2><ul>
+<li>mv 原文件名 更改文件名</li>
+</ul>
+<h2 id="查找文件"><a href="#查找文件" class="headerlink" title="查找文件"></a>查找文件</h2><ul>
+<li>find / -name 文件名</li>
+</ul>
+<h2 id="在第一行新增一行，并插入内容："><a href="#在第一行新增一行，并插入内容：" class="headerlink" title="在第一行新增一行，并插入内容："></a>在第一行新增一行，并插入内容：</h2><ul>
+<li>在非编辑模式下，使用键盘输入【1G】,将鼠标定位在第一行第一个字符</li>
+<li>使用键盘输入【O】（大写），便新增加一行，再次输入内容</li>
+<li>保存离开：:wq</li>
+</ul>
+<h2 id="取消与重复"><a href="#取消与重复" class="headerlink" title="取消与重复"></a>取消与重复</h2><ul>
+<li>重复前一个操作：u</li>
+<li>重复上一个操作：[ctrl] + r</li>
+</ul>
+<h2 id="块选择"><a href="#块选择" class="headerlink" title="块选择"></a>块选择</h2><ul>
+<li>v : 字符选择，会将光标经过的地方高亮选择</li>
+<li>V ：行选择，会将光标经过的行进行高亮选择</li>
+<li>[ctrl] + v :块选择，可以用长方形的方式选择数据</li>
+<li>y ：将高亮的地方复制</li>
+<li>d ：将高亮的地方删除</li>
+</ul>
+<h2 id="多文件编辑"><a href="#多文件编辑" class="headerlink" title="多文件编辑"></a>多文件编辑</h2><ul>
+<li>:n ：编辑下一个文件</li>
+<li>:N : 编辑上一个文件</li>
+<li>:files : 列出目前vim（编辑器）打开的所有文件</li>
+</ul>
+<h2 id="环境设置参数"><a href="#环境设置参数" class="headerlink" title="环境设置参数"></a>环境设置参数</h2><ul>
+<li>:set nu : 设置 行号</li>
+<li>:set nonu : 取消行号</li>
+<li>:$ : 文件底行</li>
+<li>:1 : 文件首行</li>
+</ul>
+<h1 id="Linux用户与组管理"><a href="#Linux用户与组管理" class="headerlink" title="Linux用户与组管理"></a>Linux用户与组管理</h1><h2 id="用户类型"><a href="#用户类型" class="headerlink" title="用户类型"></a>用户类型</h2><ul>
+<li>超级用户（root,UID=0）</li>
+<li>系统用户（UID=1~999）</li>
+<li>普通用户（UID=1000~60000）</li>
+</ul>
+<h2 id="用户账号配置文件"><a href="#用户账号配置文件" class="headerlink" title="用户账号配置文件"></a>用户账号配置文件</h2><blockquote>
+<p>用户账号配置文件：/etc/passwd<br> root:x:0:0:root:/root:/bin/bash</p>
+</blockquote>
+<h2 id="权限管理-用户组"><a href="#权限管理-用户组" class="headerlink" title="权限管理-用户组"></a>权限管理-用户组</h2><h3 id="Linux的组分为："><a href="#Linux的组分为：" class="headerlink" title="Linux的组分为："></a>Linux的组分为：</h3><ul>
+<li><strong>私有组</strong>：建立账户时，若没有指定账户所属的组，系统会建立一个和用户名相同的组，这个组就是私有组，这个组只容纳了一个用户。</li>
+<li><strong>系统组</strong>：系统组是Linux系统自动建立的</li>
+<li><strong>标准组</strong>：标准组可以容纳多个用户，组中的用户都具有组所拥有的权利。</li>
+</ul>
+<h3 id="一个用户可以属于多个组，用户所在的组又有初始组和有效组之分。"><a href="#一个用户可以属于多个组，用户所在的组又有初始组和有效组之分。" class="headerlink" title="一个用户可以属于多个组，用户所在的组又有初始组和有效组之分。"></a>一个用户可以属于多个组，用户所在的组又有初始组和有效组之分。</h3><ul>
+<li>用户登录时属于的组叫做这个用户的初始组</li>
+<li>用户创建文件时，文件所属组称为用户的有效组。</li>
+</ul>
+<h2 id="权限管理-用户管理"><a href="#权限管理-用户管理" class="headerlink" title="权限管理-用户管理"></a>权限管理-用户管理</h2><ol>
+<li>添加用户命令：uesradd [选项] 用户名</li>
+</ol>
+<ul>
+<li>-u：设置UID，用户ID和用户名必须是唯一的。</li>
+<li>-g:指定用户所属的初始用户组（组必须存在）。</li>
+<li>-G:设置用户所属的其他用户组。</li>
+<li>-c:添加用户说明</li>
+<li>-d:设置用户主目录路径</li>
+<li>-s:设置用户登录时使用的shell</li>
+</ul>
+<ol start="2">
+<li>示例：</li>
+</ol>
+<ul>
+<li>useradd user1</li>
+<li>useradd -u 1002 -g users user1</li>
+</ul>
+<ol start="3">
+<li>删除用户命令</li>
+</ol>
+<ul>
+<li>-r:删除用户的同时将用户主目录删除</li>
+</ul>
+<ol start="4">
+<li>设置用户密码命令 ：password [-r] 用户名</li>
+</ol>
+<ul>
+<li>-l:锁定用户（只有root用户可以操作）</li>
+<li>-u:解锁用户（只有root用户可以操作）</li>
+<li>输入 “passwd 用户名”设置用户名的密码</li>
+</ul>
+<h2 id="权限管理-用户组管理"><a href="#权限管理-用户组管理" class="headerlink" title="权限管理-用户组管理"></a>权限管理-用户组管理</h2><ol>
+<li>添加用户组命令：groupadd -g gid groupname</li>
+<li>删除用户组命令：groupdel groupname</li>
+</ol>
+<ul>
+<li>如果组中有用户，应先删用户，再删组。</li>
+<li>当该组是某个用户的初始组时，不能删除</li>
+</ul>
+<ol start="3">
+<li>管理用户组属性</li>
+</ol>
+<ul>
+<li>groups：查看用户的所属组</li>
+<li>groupmod：-g指定GID，-n指定name;</li>
+<li>注意，不要随便改动GID的值</li>
+</ul>
+<ol start="4">
+<li>newgrp命令</li>
+</ol>
+<ul>
+<li>如果一个用户同时属于多个组，用户可以在不同的用户组间进行切换</li>
+<li>newgrp 用户组</li>
+</ul>
+<h1 id="Linux文件权限"><a href="#Linux文件权限" class="headerlink" title="Linux文件权限"></a>Linux文件权限</h1><h2 id="文件权限-访问权限"><a href="#文件权限-访问权限" class="headerlink" title="文件权限-访问权限"></a>文件权限-访问权限</h2><ol>
+<li>访问权限规定三种不同类型的用户</li>
+</ol>
+<ul>
+<li>文件属主（user）:文件的所有者，称为属主。</li>
+<li>同组用户（group）:文件属组的同组用户</li>
+<li>可以访问系统的其他用户（other）</li>
+</ul>
+<ol start="2">
+<li>访问权限规定三种访问文件或目录的方式</li>
+</ol>
+<ul>
+<li>读（r）:允许读取文件内容或者列目录。</li>
+<li>写（W）:允许修改文件内容或者创建、删除文件</li>
+<li>可执行或查找（x）:允许执行文件或者允许使用cd命令进入目录</li>
+</ul>
+<ol start="3">
+<li>一些命令</li>
+</ol>
+<ul>
+<li>u:User,即文件或目录的拥有者</li>
+<li>g:group,即文件或目录的所属集群</li>
+<li>o:Other,除u和g，其他用户皆属于这个范围</li>
+<li>a:All,即全部的用户，包含拥有者，所属群组以及其他用户。</li>
+<li>r:读取权限，数字代号为“4”</li>
+<li>w:写入权限，数字代号为“2”</li>
+<li>x:执行或切换权限，数字代号为“1”</li>
+<li>-:不具任何权限，数字代号为“0”</li>
+</ul>
+<h2 id="文件权限-数字形式修改文件权限"><a href="#文件权限-数字形式修改文件权限" class="headerlink" title="文件权限-数字形式修改文件权限"></a>文件权限-数字形式修改文件权限</h2><ul>
+<li>数字形式即由三位八进制数字组成，其命令格式为：</li>
+<li>chmod 八进制模式 文件名</li>
+</ul>
+<blockquote>
+<p>举例：<br>chmod 641 f1<br>等价于 chmod u+wr,g+r,o+x f1</p>
+</blockquote>
+<h2 id="文件权限-默认权限"><a href="#文件权限-默认权限" class="headerlink" title="文件权限-默认权限"></a>文件权限-默认权限</h2><p>[root@localhost ~]# umask 结果：0022</p>
+<p>[root@localhost ~]# umask -S 结果：u=rwx,g=rx,o=rx</p>
+<ul>
+<li>umask指定用户在新建文件和目录时候的权限默认值</li>
+<li>umask值可以修改  umask 044</li>
+<li>默认情况下用户创建文件则没有可执行的权限 也即是666<br>-rw-rw-rw </li>
+<li>默认情况下用户创建目录权限是777<br>-rwxrwxrwx </li>
+<li>目录的权限x是指该用户能够进入到目录</li>
+<li>创建目录时默认权限  drwxr-xr-x</li>
+</ul>
+<h2 id="文件权限-特殊权限SUID"><a href="#文件权限-特殊权限SUID" class="headerlink" title="文件权限-特殊权限SUID"></a>文件权限-特殊权限SUID</h2><p>当s这个标志出现在文件所有者的x权限上时，如”-rwsr-xr-x”,就被称为Set UID,简称SUID。这个特殊权限的特殊性的作用是：</p>
+<ul>
+<li>SUID的权限仅对二进制程序有效</li>
+<li>执行者对于该程序需要具有x的可执行权限</li>
+<li>本权限仅在执行该程序的过程中有效（run-time）。</li>
+<li>执行者将具有该程序拥有者（owner）的权限。</li>
+</ul>
+<h2 id="文件权限-特殊权限SGID"><a href="#文件权限-特殊权限SGID" class="headerlink" title="文件权限-特殊权限SGID"></a>文件权限-特殊权限SGID</h2><p>当s这个标志出现在文件所属用户组的x权限上时，如”-r-x–s–x”,就被称为Set GID,简称SGID。这个特殊权限啊的特殊性的作用是：</p>
+<ul>
+<li>SGID对二进制程序有效</li>
+<li>程序执行者对于该程序来说，需具备x的权限。</li>
+<li>SGID主要用在目录上。</li>
+<li>执行者在执行的过程中，将会获得该程序用户组的支持。</li>
+</ul>
+<h2 id="文件权限-特殊权限SBIT"><a href="#文件权限-特殊权限SBIT" class="headerlink" title="文件权限-特殊权限SBIT"></a>文件权限-特殊权限SBIT</h2><p>Sticky Bit(SBIT)当前只针对目录有效，对文件没有效果。其对目录的作用是：</p>
+<ul>
+<li>在具有SBIT的目录下，用户若在该目录下具有w及x权限，则当用户在该目录下建立文件或目录时，只有文件拥有者与root才有权力删除。</li>
+<li>换句话讲：当甲用户属于A目录的group成员或属于other，且拥有 w 权限时，可以对该目录内任何人建立的目录或文件进行“删除/重命名/移动”等操作。不过，如果将A目录加上了SBIT权限，则甲用户只能针对自己建立的文件或目录进行“删除/重命名/移动”等操作。</li>
+</ul>
+<h2 id="文件权限-ACL权限"><a href="#文件权限-ACL权限" class="headerlink" title="文件权限-ACL权限"></a>文件权限-ACL权限</h2><p>设定ACL权限的命令：setfacl 选项 文件|目录</p>
+<ul>
+<li>-m:设定ACL权限</li>
+<li>-x:设定指定的ACL权限</li>
+<li>-b:删除所有的ACL权限</li>
+<li>-d:设定默认的ACL权限</li>
+<li>-k:删除默认的ACL权限</li>
+<li>-R:递归设定ACL权限</li>
+</ul>
+<p>查看ACL权限的命令：getfacl 文件|目录</p>
+<ul>
+<li>-d:显示默认的ACL权限</li>
+<li>-R:显示目录及其子目录和文件的ACL权限</li>
+<li>-c:不显示文件或目录的基本信息</li>
+<li>-E:不显示有效权限</li>
+</ul>
+<h2 id="CentOS7命令行与图形界面启动模式修改"><a href="#CentOS7命令行与图形界面启动模式修改" class="headerlink" title="CentOS7命令行与图形界面启动模式修改"></a>CentOS7命令行与图形界面启动模式修改</h2><ul>
+<li>命令启动<blockquote>
+<p>systemctl set-default multi-user.target</p>
+</blockquote>
+</li>
+<li>图形界面模式<blockquote>
+<p>systemctl set-default graphical.target</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="补充：Ctrl-c-Ctrl-d-Ctrl-z在Linux中意义"><a href="#补充：Ctrl-c-Ctrl-d-Ctrl-z在Linux中意义" class="headerlink" title="补充：Ctrl+c,Ctrl+d,Ctrl+z在Linux中意义"></a>补充：Ctrl+c,Ctrl+d,Ctrl+z在Linux中意义</h2><ul>
+<li>Ctrl+c和ctrl+z都是中断命令,但是他们的作用却不一样</li>
+<li>Ctrl+c是强制中断程序的执行。</li>
+<li>Ctrl+z的是将任务中断,但是此任务并没有结束,他仍然在进程中他只是维持挂起的状态。</li>
+<li>Ctrl+d 不是发送信号，而是表示一个特殊的二进制值，表示 EOF。</li>
+</ul>
+<hr>
+</div>
+
+			<script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+			<script>
+			var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);
+			if (!isMobile) {
+			    var btw = new BTWPlugin();
+			    btw.init({
+			        "id": "vip-container",
+			        "blogId": "15743-1570943068343-906",
+			        "name": "大数据实战演练",
+			        "qrcode": "https://gcore.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",
+			        "keyword": "vip"
+			    });
+			}
+			</script>
+		</div><strong>再见</strong><br><hr class="bottom_msg"><br><h3><a href="#点关注，不迷路" title="点关注，不迷路" class="headerlink">点关注，不迷路</a></h3><br><p>好了各位，以上就是这篇文章的全部内容了，能看到这里的人呀，都是<strong>人才</strong>。</p><br><p><strong>白嫖不好，创作不易。</strong>各位的支持和认可，就是我创作的最大动力，我们下篇文章见！</p><br><p>如果本篇博客有任何错误，请批评指教，不胜感激 ！</p><br><div class="post-qrcode"><div class="qrcode_bar center"><img src="/img/qrcode.png" title="扫一扫交个朋友" alt="微信公众号二维码" width="100%"></div></div><script type="text/javascript" src="/js/jquery.js?v=2.0.4" async></script><div class="post-donate"><div id="donate_board" class="donate_bar center"><a id="btn_donate" href="javascript:;" title="打赏" class="btn_donate"></a><div class="donate_txt"> &uarr;<br>坚持原创技术分享，您的支持将鼓励我继续创作！<br></div></div><div id="donate_guide" class="donate_bar center hidden pay"><img src="/img/weChatMoney.png" id="wechatpay" title="微信打赏" alt="微信打赏"><img src="/img/alipayMoney.png" id="alipay" title="支付宝打赏" alt="支付宝打赏"></div><script type="text/javascript">document.getElementById('btn_donate').onclick = function(){
+    // $('#donate_board').addClass('hidden');
+    // $('#donate_guide').removeClass('hidden');
+    $('#donate_guide').toggle();
+}</script></div><script type="text/javascript" src="/js/jquery.fancybox.js?v=2.0.4" async></script><script type="text/javascript" src="/js/wrapImage.js?v=2.0.4" async></script><div class="post-copyright"><blockquote><p>原文作者: create17</p><p>原文链接: <a href="https://841809077.github.io/2017/07/24/Linux/Linux基础知识(一).html">https://841809077.github.io/2017/07/24/Linux/Linux基础知识(一).html</a></p><p>版权声明: 转载请注明出处(码字不易，请保留作者署名及链接，谢谢配合！)</p></blockquote></div><div class="tags"></div><div class="post-share"><div class="social-share"><span>分享到:</span></div></div><div class="post-nav"><a href="/2017/09/21/MySQL/MySQL安装与卸载.html" class="pre">MySQL安装与卸载  --linux</a></div><div id="comments"><div id="container"><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js?v=2.0.4"></script><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=2.0.4"></script><script>var gitalk = new Gitalk({
+  clientID: '7ff674ca1078ead070aa',
+  clientSecret: 'f176d4d73417fd566e3e0ac6319aeb4708f4099d',
+  repo: '841809077.github.io',
+  owner: '841809077',
+  admin: ['841809077'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false,
+  language: 'zh-CN',
+  pagerDirection: 'last'
+})
+gitalk.render('container')</script></div></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#vi的几种模式"><span class="toc-text">vi的几种模式</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#vim编辑器的使用"><span class="toc-text">vim编辑器的使用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#vim程序编辑器-插入模式"><span class="toc-text">vim程序编辑器-插入模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#末行模式"><span class="toc-text">末行模式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#光标移动"><span class="toc-text">光标移动</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#查找与替换"><span class="toc-text">查找与替换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删除、粘贴与复制"><span class="toc-text">删除、粘贴与复制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#复制粘贴文件：cp-filename"><span class="toc-text">复制粘贴文件：cp filename</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件移动-mv"><span class="toc-text">文件移动 mv</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件重命名"><span class="toc-text">文件重命名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#查找文件"><span class="toc-text">查找文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#在第一行新增一行，并插入内容："><span class="toc-text">在第一行新增一行，并插入内容：</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#取消与重复"><span class="toc-text">取消与重复</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#块选择"><span class="toc-text">块选择</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多文件编辑"><span class="toc-text">多文件编辑</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#环境设置参数"><span class="toc-text">环境设置参数</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux用户与组管理"><span class="toc-text">Linux用户与组管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#用户类型"><span class="toc-text">用户类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#用户账号配置文件"><span class="toc-text">用户账号配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#权限管理-用户组"><span class="toc-text">权限管理-用户组</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Linux的组分为："><span class="toc-text">Linux的组分为：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#一个用户可以属于多个组，用户所在的组又有初始组和有效组之分。"><span class="toc-text">一个用户可以属于多个组，用户所在的组又有初始组和有效组之分。</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#权限管理-用户管理"><span class="toc-text">权限管理-用户管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#权限管理-用户组管理"><span class="toc-text">权限管理-用户组管理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Linux文件权限"><span class="toc-text">Linux文件权限</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#文件权限-访问权限"><span class="toc-text">文件权限-访问权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件权限-数字形式修改文件权限"><span class="toc-text">文件权限-数字形式修改文件权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件权限-默认权限"><span class="toc-text">文件权限-默认权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件权限-特殊权限SUID"><span class="toc-text">文件权限-特殊权限SUID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件权限-特殊权限SGID"><span class="toc-text">文件权限-特殊权限SGID</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件权限-特殊权限SBIT"><span class="toc-text">文件权限-特殊权限SBIT</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#文件权限-ACL权限"><span class="toc-text">文件权限-ACL权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CentOS7命令行与图形界面启动模式修改"><span class="toc-text">CentOS7命令行与图形界面启动模式修改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#补充：Ctrl-c-Ctrl-d-Ctrl-z在Linux中意义"><span class="toc-text">补充：Ctrl+c,Ctrl+d,Ctrl+z在Linux中意义</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2023/03/13/ELK/Elasticsearch/API/es-query-dsl.html">Elasticsearch Query DSL 查询</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/11/09/ELK/Elasticsearch/疑难问题/fielddata-data-too-large.html">Elasticsearch查询报错：FIELDDATA Data is too large</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/12/ELK/Elasticsearch/Client/elasticsearch-bool-query.html">Elasticsearch bool复合查询</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/12/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-client-query.html">Elasticsearch-7.6.2客户端查询指南</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/11/Prometheus/prometheus-query-functions.html">Prometheus常用查询函数梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/07/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-xpack-java-client.html">Elasticsearch-7.6.2部署并开启xpack，java客户端明文密码连接指南</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/30/Prometheus/Exporter/rabbitmq-exporter.html">RabbitMQ exporter部署</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/20/GoLang/go-time-usage.html">golang 时间相关操作集合</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/08/12/Ambari/运维相关/hdp-copmonment-version.html">如何查看HDP各组件版本信息，两种办法</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/07/28/Docker/docker-faq.html">docker 常见问题解答汇总</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-weixin"> 微信公众号</i></div><img width="100%" height="100%" title="微信扫一扫，订阅更多技术干货" alt="啊哦，图片丢失了... 加我微信: create17_，联系我吧" src="/img/prcode_square.jpg"/></div><div class="widget"><div class="widget-title"><i class="iconfont2 iconscan"> 加我好友（与我互动）</i></div><div class="img-po"><img width="100%" height="100%" title="微信扫一扫，欢迎与我交流！" alt="微信号: create17_，欢迎与我交流！" src="/img/wechat_code.jpg"/></div></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AlertManager/">AlertManager</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Ambari/">Ambari</a><span class="category-list-count">33</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK/">ELK</a><span class="category-list-count">21</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/EmberJS/">EmberJS</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/FastDFS/">FastDFS</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Flume/">Flume</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/GoLang/">GoLang</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HBase/">HBase</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HDFS/">HDFS</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HUE/">HUE</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Hadoop/">Hadoop</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JavaScript/">JavaScript</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java工具类/">Java工具类</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/K8s/">K8s</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kafka/">Kafka</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kerberos/">Kerberos</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kettle/">Kettle</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kylin/">Kylin</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/PostgreSQL/">PostgreSQL</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Prometheus/">Prometheus</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Python/">Python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scala/">Scala</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scrapy爬虫框架/">Scrapy爬虫框架</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Solr/">Solr</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spark/">Spark</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Sqoop/">Sqoop</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Zookeeper/">Zookeeper</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go语言/">go语言</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo搭建个人博客/">hexo搭建个人博客</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">22</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/yarn/">yarn</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/你有酒我有故事/">你有酒我有故事</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/大数据/">大数据</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/开发工具/">开发工具</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/浏览器插件/">浏览器插件</a><span class="category-list-count">1</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/hadoop服务组件/" style="font-size: 15px;">hadoop服务组件</a> <a href="/tags/Hadoop服务组件/" style="font-size: 15px;">Hadoop服务组件</a> <a href="/tags/security/" style="font-size: 15px;">security</a> <a href="/tags/ntp/" style="font-size: 15px;">ntp</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Kylin/" style="font-size: 15px;">Kylin</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/python实战/" style="font-size: 15px;">python实战</a> <a href="/tags/idea/" style="font-size: 15px;">idea</a> <a href="/tags/ambari/" style="font-size: 15px;">ambari</a> <a href="/tags/自定义服务/" style="font-size: 15px;">自定义服务</a> <a href="/tags/书籍福利/" style="font-size: 15px;">书籍福利</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">八月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">九月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">六月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="https://blog.csdn.net/CREATE_17" title="CSDN - CREATE_17" target="_blank">CSDN - CREATE_17</a><ul></ul><a href="https://www.iteblog.com/" title="过往记忆 的大数据博客" target="_blank">过往记忆 的大数据博客</a><ul></ul><a href="https://shirukai.github.io/" title="Rukai Shi 的大数据博客" target="_blank">Rukai Shi 的大数据博客</a><ul></ul><a href="https://liunaijie.github.io/" title="蒙娜丽莎法师" target="_blank">蒙娜丽莎法师</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">网站地图</a> |  <a href="/atom.xml">订阅本站</a> |  <a href="/about/">联系博主</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次，本站总访客数:<i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>人</p><p><span> Copyright &copy;<a href="/." rel="nofollow">create17.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script type="text/javascript" src="/js/search.json.js?v=2.0.4"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.4" async></script><link rel="stylesheet" type="text/css" href="/share/css/share.css"><script type="text/javascript" src="/share/js/social-share.js" charset="utf-8"></script><script type="text/javascript" src="/share/js/qrcode.js" charset="utf-8"></script></body></html>

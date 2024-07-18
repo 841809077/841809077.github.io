@@ -1,0 +1,227 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><meta name="keywords" content="Ambari、Java、Kafka、HBase、Elasticsearch、GoLang、Kubernetes、Prometheus"><link rel="stylesheet" type="text/css" href="//fonts.loli.net/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/qrcode.css"><link rel="stylesheet" type="text/css" href="/css/donate.css"><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.4"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.4"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><link rel="stylesheet" type="text/css" href="https://unpkg.com/gitalk/dist/gitalk.css?v=2.0.4"><title>Ambari-server开发自定义api | ━Start。平常心_</title></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Ambari-server开发自定义api</h1><a id="logo" href="/.">━Start。平常心_</a><p class="description">作者：create17，座右铭：每一个成功人士的背后，必定曾经做出过勇敢而又孤独的决定。放弃不难，但坚持很酷~</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 主页</i></a><a href="/archives/"><i class="fa fa-archive"> 文章时间轴</i></a><a href="/about/"><i class="fa fa-user"> 自我介绍</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">Ambari-server开发自定义api</h1><div class="post-meta"><a href="/2018/07/10/Ambari/ambari server 二次开发/Ambari-server开发自定义api.html#comments" class="comment-count"></a><p><span class="date">2018-07-10</span><span><a href="/categories/Ambari/" class="category">Ambari</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><div id="vip-container"><blockquote>
+<p>声明：博主写了一些Ambari系列文章，可以在历史文章中查看。</p>
+</blockquote>
+<blockquote>
+<p>本文篇幅较长，但都是满满的干货。主要从Ambari-server详解、如何debug ambari-server源码、开发流程分析图、开发流程自定义示例四大部分入手，教读者如何玩转ambari-server</p>
+</blockquote>
+<h3 id="一、Ambari-server详解"><a href="#一、Ambari-server详解" class="headerlink" title="一、Ambari-server详解"></a>一、Ambari-server详解</h3><h4 id="1-简介"><a href="#1-简介" class="headerlink" title="1. 简介"></a>1. 简介</h4><p>Ambari-Server是一个WEB Server，提供统一的REST API接口，同时向web和agent开放了两个不同的端口（默认前者是8080, 后者是8440或者8441）。它是由Jetty Server容器构建，通过Spring Framework构建出来的WEB服务器，其中大量采用了google提供的Guice注解完成spring框架所需要的注入功能。 REST框架由JAX-RS标准来构建。 </p>
+<a id="more"></a>
+<h4 id="2-目录"><a href="#2-目录" class="headerlink" title="2. 目录"></a>2. 目录</h4><table>
+<thead>
+<tr>
+<th>目录</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>org.apache.ambari.server.api.services</td>
+<td>对web接口的入口方法，处理/api/v1/* 的请求</td>
+</tr>
+<tr>
+<td>org.apache.ambari.server.controller</td>
+<td>对Ambari中cluster的管理处理，如新增host，更service、删除component等</td>
+</tr>
+<tr>
+<td>org.apache.ambari.server.controller.internal</td>
+<td>主要存放ResourceProvider和PropertyProvider；</td>
+</tr>
+<tr>
+<td>org.apache.ambari.service.orm.*</td>
+<td>对数据库的操作</td>
+</tr>
+<tr>
+<td>org.apache.ambari.server.agent.rest</td>
+<td>处理与Agent的接口的入口方法</td>
+</tr>
+<tr>
+<td>org.apache.ambari.security</td>
+<td>使用Spring Security来做权限管理</td>
+</tr>
+</tbody>
+</table>
+<h4 id="3-Resource"><a href="#3-Resource" class="headerlink" title="3. Resource"></a>3. Resource</h4><p>其中，每一种Resource都对应一个ResourceProvider，对应关系如下：  </p>
+<table>
+<thead>
+<tr>
+<th>Resource.Type</th>
+<th>ResourceProvider</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Workflow</td>
+<td>WorkflowResourceProvider</td>
+</tr>
+<tr>
+<td>Job</td>
+<td>JobResourceProvider</td>
+</tr>
+<tr>
+<td>TaskAttempt</td>
+<td>TaskAttemptResourceProvider</td>
+</tr>
+<tr>
+<td>View</td>
+<td>ViewResourceProvider</td>
+</tr>
+<tr>
+<td>ViewInstance</td>
+<td>ViewInstanceResourceProvider</td>
+</tr>
+<tr>
+<td>Blueprint</td>
+<td>BlueprintResourceProvider</td>
+</tr>
+<tr>
+<td>Cluster</td>
+<td>ClusterResourceProvider</td>
+</tr>
+<tr>
+<td>Service</td>
+<td>ServiceResourceProvider</td>
+</tr>
+<tr>
+<td>Component</td>
+<td>ComponentResourceProvider</td>
+</tr>
+<tr>
+<td>Host</td>
+<td>HostResourceProvider</td>
+</tr>
+<tr>
+<td>HostComponent</td>
+<td>HostComponentResourceProvider</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td>ConfigurationResourceProvider</td>
+</tr>
+<tr>
+<td>Action</td>
+<td>ActionResourceProvider</td>
+</tr>
+<tr>
+<td>Request</td>
+<td>RequestResourceProvider</td>
+</tr>
+<tr>
+<td>Task</td>
+<td>TaskResourceProvider</td>
+</tr>
+<tr>
+<td>User</td>
+<td>UserResourceProvider</td>
+</tr>
+<tr>
+<td>Stack</td>
+<td>StackResourceProvider</td>
+</tr>
+<tr>
+<td>StackVersion</td>
+<td>StackVersionResourceProvider</td>
+</tr>
+<tr>
+<td>StackService</td>
+<td>StackServiceResourceProvider</td>
+</tr>
+<tr>
+<td>StackServiceComponent</td>
+<td>StackServiceComponentResourceProvider</td>
+</tr>
+<tr>
+<td>StackConfiguration</td>
+<td>StackConfigurationResourceProvider</td>
+</tr>
+<tr>
+<td>OperatingSystem</td>
+<td>OperatingSystemResourceProvider</td>
+</tr>
+<tr>
+<td>Repository</td>
+<td>RepositoryResourceProvider</td>
+</tr>
+<tr>
+<td>RootService</td>
+<td>RootServiceResourceProvider</td>
+</tr>
+<tr>
+<td>RootServiceComponent</td>
+<td>RootServiceComponentResourceProvider</td>
+</tr>
+<tr>
+<td>RootServiceHostComponent</td>
+<td>RootServiceHostComponentResourceProvider</td>
+</tr>
+<tr>
+<td>ConfigGroup</td>
+<td>ConfigGroupResourceProvider</td>
+</tr>
+<tr>
+<td>RequestSchedule</td>
+<td>RequestScheduleResourceProvider</td>
+</tr>
+</tbody>
+</table>
+<p>我们对数据的处理就是在xxxResourceProvider.java内实现。</p>
+<h4 id="4-获取数据流程"><a href="#4-获取数据流程" class="headerlink" title="4. 获取数据流程"></a>4. 获取数据流程</h4><p>​    (1) jersy接口接收到请求，创建一个ResourceInstance实例；</p>
+<p>​    (2) 解析http请求构造一个Request对象，然后交给reques的process()方法来处理；</p>
+<p>​    (3) reques解析url或http_body得到一个Predicate对象；</p>
+<p>​    (4) 根据http类型获取handler，GET请求对应ReadHandler；</p>
+<p>​    (5) handler向Query对象中添加分页、Render、Predicate等属性后，然后让query.execute()；</p>
+<p>​    (6) 根据Resource.Type获得对应的ResourceProvider对象，调用其getResources方法得到Set\<resource>；</resource></p>
+<p>​    (7) 调用对应的PropertyProvider填充Resource；</p>
+<p>​    (8) 处理结果，返回json结果;</p>
+<h3 id="二、Ambari-server-Debug模式"><a href="#二、Ambari-server-Debug模式" class="headerlink" title="二、Ambari-server Debug模式"></a>二、Ambari-server Debug模式</h3><h4 id="1-停止ambari-server服务"><a href="#1-停止ambari-server服务" class="headerlink" title="1. 停止ambari-server服务"></a>1. 停止ambari-server服务</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ambari-server stop</span><br></pre></td></tr></table></figure>
+<h4 id="2-以debug的方式来启动ambari-server"><a href="#2-以debug的方式来启动ambari-server" class="headerlink" title="2. 以debug的方式来启动ambari-server"></a>2. 以debug的方式来启动ambari-server</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java -server -Xdebug  -Xrunjdwp:transport=dt_socket,suspend=n,server=y,address=5005 -XX:NewRatio=3 -XX:+UseConcMarkSweepGC -XX:-UseGCOverheadLimit -XX:CMSInitiatingOccupancyFraction=60 -XX:+CMSClassUnloadingEnabled -Dsun.zip.disableMemoryMapping=true -Xms1012m -Xmx3048m -XX:MaxPermSize=256m -Djava.security.auth.login.config=/etc/ambari-server/conf/krb5JAASLogin.conf -Djava.security.krb5.conf=/etc/krb5.conf -Djavax.security.auth.useSubjectCredsOnly=false -cp /etc/ambari-server/conf:/usr/lib/ambari-server/*:/usr/share/java/mysql-connector-java-5.1.45-bin.jar     org.apache.ambari.server.controller.AmbariServer</span><br></pre></td></tr></table></figure>
+<p>如图所示：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/qiniuCopy/201807151755_850.png" alt></p>
+<h4 id="3-在IDEA中连接Ambari-Server"><a href="#3-在IDEA中连接Ambari-Server" class="headerlink" title="3. 在IDEA中连接Ambari-Server"></a>3. 在IDEA中连接Ambari-Server</h4><p>ambari-server默认配置了服务端的debug参数，端口为5005。如果要修改端口，可以在<code>/usr/sbin/ambari_server_main.py</code>文件中的对应位置修改，对应的ambari源码位置是<code>ambari-server/src/main/python/ambari_server_main.py</code>，直接改5005端口即可。代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">SERVER_START_CMD_DEBUG = <span class="string">"&#123;0&#125; "</span> \</span><br><span class="line">    <span class="string">"-server -XX:NewRatio=2 "</span> \</span><br><span class="line">    <span class="string">"-XX:+UseConcMarkSweepGC "</span> + \</span><br><span class="line">    <span class="string">"&#123;1&#125; &#123;2&#125; "</span> \</span><br><span class="line">    <span class="string">" -Xdebug -Xrunjdwp:transport=dt_socket,address=5005,"</span> \</span><br><span class="line">    <span class="string">"server=y,suspend=&#123;6&#125; "</span> \</span><br><span class="line">    <span class="string">"-cp &#123;3&#125; "</span> + \</span><br><span class="line">    <span class="string">"org.apache.ambari.server.controller.AmbariServer "</span> \</span><br><span class="line">    <span class="string">"&gt; &#123;4&#125; 2&gt;&amp;1 || echo $? &gt; &#123;5&#125;"</span></span><br></pre></td></tr></table></figure>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/qiniuCopy/201807151759_688.png" alt></p>
+<p>在你要运行的代码上打上断点，比如，我要看<code>http://172.16.0.142:8080/api/v1/users</code>，就在user的代码某流程处打上断点：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/qiniuCopy/201807162045_764.png" alt></p>
+<p>点击<code>debug</code>按钮，在XShell内输入：<code>curl -u admin:admin http://172.16.0.142:8080/api/v1/users</code>，</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/qiniuCopy/201807162049_391.png" alt></p>
+<p>debug模式下，这几个按钮比较常用。从上往下，从左往右描述，分别为：一键断点处、断点概览、取消全部断点、平行执行、跳入执行、跳出执行等。</p>
+<p>当一个流程走通时，如果要关闭debug模式，只需要<code>Ctrl + c</code>终止debug进程即可。这样ambari-server也就停掉了。</p>
+<h3 id="三、开发流程分析"><a href="#三、开发流程分析" class="headerlink" title="三、开发流程分析"></a>三、开发流程分析</h3><p>以 GET /api/v1/users 为例进行。该接口用于获取所有用户。<br>资源请求类，一通百通。</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/202306/1721195517140.png" alt></p>
+<h4 id="1-省略若干内容"><a href="#1-省略若干内容" class="headerlink" title="1. 省略若干内容"></a>1. 省略若干内容</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">由于商业价值，此处省略若干内容...</span><br><span class="line">如需获取清洗流程图以及后续详细干货内容，可添加好友：create17_ 详聊。</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h4 id="9-REST-API展示形式"><a href="#9-REST-API展示形式" class="headerlink" title="9. REST API展示形式"></a>9. REST API展示形式</h4><figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    href: "http://172.16.0.142:8080/api/v1/log/getAuditLog",</span><br><span class="line">    items: [</span><br><span class="line">        &#123;</span><br><span class="line">            href: "http://172.16.0.142:8080/api/v1/log/getAuditLog/2",</span><br><span class="line">            auditlog: &#123;</span><br><span class="line">                id: 2,</span><br><span class="line">                note: "2018-06-22T17:57:06.894-0700, User(admin), RemoteIp(172.16.0.167), Operation(User login), Roles( Ambari: 管理员 ), Status(Success)",</span><br><span class="line">                operation: "User login",</span><br><span class="line">                remoteIp: "172.16.0.167",</span><br><span class="line">                status: "Success",</span><br><span class="line">                time: "2018-06-22 17:57:06",</span><br><span class="line">                user: "admin"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            href: "http://172.16.0.142:8080/api/v1/log/getAuditLog/1855",</span><br><span class="line">            auditlog: &#123;</span><br><span class="line">                id: 1855,</span><br><span class="line">                note: "2018-07-12T18:51:00.846+0800, User(admin), RemoteIp(172.16.0.142), Operation(User login), Roles( Ambari: 管理员 ), Status(Success)",</span><br><span class="line">                operation: "User login",</span><br><span class="line">                remoteIp: "172.16.0.142",</span><br><span class="line">                status: "Success",</span><br><span class="line">                time: "2018-07-12 18:51:00",</span><br><span class="line">                user: "admin"</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="四、如何联系我"><a href="#四、如何联系我" class="headerlink" title="四、如何联系我"></a>四、如何联系我</h3><p>如需获取清洗流程图以及后续详细干货内容，可添加好友：create17_ 详聊。</p>
+<p>Ambari 二次开发知识库地址：<a href="https://www.yuque.com/create17/ambari" target="_blank" rel="noopener">https://www.yuque.com/create17/ambari</a></p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/202306/1721196377367.jpg" alt></p>
+</div>
+
+			<script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+			<script>
+			var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);
+			if (!isMobile) {
+			    var btw = new BTWPlugin();
+			    btw.init({
+			        "id": "vip-container",
+			        "blogId": "15743-1570943068343-906",
+			        "name": "大数据实战演练",
+			        "qrcode": "https://gcore.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",
+			        "keyword": "vip"
+			    });
+			}
+			</script>
+		</div><strong>再见</strong><br><hr class="bottom_msg"><br><h3><a href="#点关注，不迷路" title="点关注，不迷路" class="headerlink">点关注，不迷路</a></h3><br><p>好了各位，以上就是这篇文章的全部内容了，能看到这里的人呀，都是<strong>人才</strong>。</p><br><p><strong>白嫖不好，创作不易。</strong>各位的支持和认可，就是我创作的最大动力，我们下篇文章见！</p><br><p>如果本篇博客有任何错误，请批评指教，不胜感激 ！</p><br><div class="post-qrcode"><div class="qrcode_bar center"><img src="/img/qrcode.png" title="扫一扫交个朋友" alt="微信公众号二维码" width="100%"></div></div><script type="text/javascript" src="/js/jquery.js?v=2.0.4" async></script><div class="post-donate"><div id="donate_board" class="donate_bar center"><a id="btn_donate" href="javascript:;" title="打赏" class="btn_donate"></a><div class="donate_txt"> &uarr;<br>坚持原创技术分享，您的支持将鼓励我继续创作！<br></div></div><div id="donate_guide" class="donate_bar center hidden pay"><img src="/img/weChatMoney.png" id="wechatpay" title="微信打赏" alt="微信打赏"><img src="/img/alipayMoney.png" id="alipay" title="支付宝打赏" alt="支付宝打赏"></div><script type="text/javascript">document.getElementById('btn_donate').onclick = function(){
+    // $('#donate_board').addClass('hidden');
+    // $('#donate_guide').removeClass('hidden');
+    $('#donate_guide').toggle();
+}</script></div><script type="text/javascript" src="/js/jquery.fancybox.js?v=2.0.4" async></script><script type="text/javascript" src="/js/wrapImage.js?v=2.0.4" async></script><div class="post-copyright"><blockquote><p>原文作者: create17</p><p>原文链接: <a href="https://841809077.github.io/2018/07/10/Ambari/ambari server 二次开发/Ambari-server开发自定义api.html">https://841809077.github.io/2018/07/10/Ambari/ambari server 二次开发/Ambari-server开发自定义api.html</a></p><p>版权声明: 转载请注明出处(码字不易，请保留作者署名及链接，谢谢配合！)</p></blockquote></div><div class="tags"></div><div class="post-share"><div class="social-share"><span>分享到:</span></div></div><div class="post-nav"><a href="/2018/07/13/Ambari/运维相关/Ambari相关知识.html" class="pre">Ambari相关知识</a><a href="/2018/06/22/工具/Chorme crx.html" class="next">好用的谷歌插件</a></div><div id="comments"><div id="container"><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js?v=2.0.4"></script><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=2.0.4"></script><script>var gitalk = new Gitalk({
+  clientID: '7ff674ca1078ead070aa',
+  clientSecret: 'f176d4d73417fd566e3e0ac6319aeb4708f4099d',
+  repo: '841809077.github.io',
+  owner: '841809077',
+  admin: ['841809077'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false,
+  language: 'zh-CN',
+  pagerDirection: 'last'
+})
+gitalk.render('container')</script></div></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#一、Ambari-server详解"><span class="toc-text">一、Ambari-server详解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-简介"><span class="toc-text">1. 简介</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-目录"><span class="toc-text">2. 目录</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-Resource"><span class="toc-text">3. Resource</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-获取数据流程"><span class="toc-text">4. 获取数据流程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#二、Ambari-server-Debug模式"><span class="toc-text">二、Ambari-server Debug模式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-停止ambari-server服务"><span class="toc-text">1. 停止ambari-server服务</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-以debug的方式来启动ambari-server"><span class="toc-text">2. 以debug的方式来启动ambari-server</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-在IDEA中连接Ambari-Server"><span class="toc-text">3. 在IDEA中连接Ambari-Server</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#三、开发流程分析"><span class="toc-text">三、开发流程分析</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-省略若干内容"><span class="toc-text">1. 省略若干内容</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#9-REST-API展示形式"><span class="toc-text">9. REST API展示形式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#四、如何联系我"><span class="toc-text">四、如何联系我</span></a></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2023/03/13/ELK/Elasticsearch/API/es-query-dsl.html">Elasticsearch Query DSL 查询</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/11/09/ELK/Elasticsearch/疑难问题/fielddata-data-too-large.html">Elasticsearch查询报错：FIELDDATA Data is too large</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/12/ELK/Elasticsearch/Client/elasticsearch-bool-query.html">Elasticsearch bool复合查询</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/12/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-client-query.html">Elasticsearch-7.6.2客户端查询指南</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/11/Prometheus/prometheus-query-functions.html">Prometheus常用查询函数梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/07/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-xpack-java-client.html">Elasticsearch-7.6.2部署并开启xpack，java客户端明文密码连接指南</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/30/Prometheus/Exporter/rabbitmq-exporter.html">RabbitMQ exporter部署</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/20/GoLang/go-time-usage.html">golang 时间相关操作集合</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/08/12/Ambari/运维相关/hdp-copmonment-version.html">如何查看HDP各组件版本信息，两种办法</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/07/28/Docker/docker-faq.html">docker 常见问题解答汇总</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-weixin"> 微信公众号</i></div><img width="100%" height="100%" title="微信扫一扫，订阅更多技术干货" alt="啊哦，图片丢失了... 加我微信: create17_，联系我吧" src="/img/prcode_square.jpg"/></div><div class="widget"><div class="widget-title"><i class="iconfont2 iconscan"> 加我好友（与我互动）</i></div><div class="img-po"><img width="100%" height="100%" title="微信扫一扫，欢迎与我交流！" alt="微信号: create17_，欢迎与我交流！" src="/img/wechat_code.jpg"/></div></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AlertManager/">AlertManager</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Ambari/">Ambari</a><span class="category-list-count">33</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK/">ELK</a><span class="category-list-count">21</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/EmberJS/">EmberJS</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/FastDFS/">FastDFS</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Flume/">Flume</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/GoLang/">GoLang</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HBase/">HBase</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HDFS/">HDFS</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HUE/">HUE</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Hadoop/">Hadoop</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JavaScript/">JavaScript</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java工具类/">Java工具类</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/K8s/">K8s</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kafka/">Kafka</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kerberos/">Kerberos</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kettle/">Kettle</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kylin/">Kylin</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/PostgreSQL/">PostgreSQL</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Prometheus/">Prometheus</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Python/">Python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scala/">Scala</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scrapy爬虫框架/">Scrapy爬虫框架</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Solr/">Solr</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spark/">Spark</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Sqoop/">Sqoop</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Zookeeper/">Zookeeper</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go语言/">go语言</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo搭建个人博客/">hexo搭建个人博客</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">22</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/yarn/">yarn</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/你有酒我有故事/">你有酒我有故事</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/大数据/">大数据</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/开发工具/">开发工具</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/浏览器插件/">浏览器插件</a><span class="category-list-count">1</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/hadoop服务组件/" style="font-size: 15px;">hadoop服务组件</a> <a href="/tags/Hadoop服务组件/" style="font-size: 15px;">Hadoop服务组件</a> <a href="/tags/security/" style="font-size: 15px;">security</a> <a href="/tags/ntp/" style="font-size: 15px;">ntp</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Kylin/" style="font-size: 15px;">Kylin</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/python实战/" style="font-size: 15px;">python实战</a> <a href="/tags/idea/" style="font-size: 15px;">idea</a> <a href="/tags/ambari/" style="font-size: 15px;">ambari</a> <a href="/tags/自定义服务/" style="font-size: 15px;">自定义服务</a> <a href="/tags/书籍福利/" style="font-size: 15px;">书籍福利</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">八月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">九月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">六月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="https://blog.csdn.net/CREATE_17" title="CSDN - CREATE_17" target="_blank">CSDN - CREATE_17</a><ul></ul><a href="https://www.iteblog.com/" title="过往记忆 的大数据博客" target="_blank">过往记忆 的大数据博客</a><ul></ul><a href="https://shirukai.github.io/" title="Rukai Shi 的大数据博客" target="_blank">Rukai Shi 的大数据博客</a><ul></ul><a href="https://liunaijie.github.io/" title="蒙娜丽莎法师" target="_blank">蒙娜丽莎法师</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">网站地图</a> |  <a href="/atom.xml">订阅本站</a> |  <a href="/about/">联系博主</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次，本站总访客数:<i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>人</p><p><span> Copyright &copy;<a href="/." rel="nofollow">create17.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script type="text/javascript" src="/js/search.json.js?v=2.0.4"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.4" async></script><link rel="stylesheet" type="text/css" href="/share/css/share.css"><script type="text/javascript" src="/share/js/social-share.js" charset="utf-8"></script><script type="text/javascript" src="/share/js/qrcode.js" charset="utf-8"></script></body></html>

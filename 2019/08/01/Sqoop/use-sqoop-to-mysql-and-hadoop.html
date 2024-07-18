@@ -1,0 +1,245 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><meta name="keywords" content="Ambari、Java、Kafka、HBase、Elasticsearch、GoLang、Kubernetes、Prometheus"><link rel="stylesheet" type="text/css" href="//fonts.loli.net/css?family=Source+Code+Pro"><link rel="stylesheet" type="text/css" href="/css/qrcode.css"><link rel="stylesheet" type="text/css" href="/css/donate.css"><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=2.0.4"><link rel="stylesheet" type="text/css" href="/css/highlight.css?v=2.0.4"><link rel="Shortcut Icon" href="/favicon.ico"><link rel="bookmark" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"><link rel="stylesheet" type="text/css" href="https://unpkg.com/gitalk/dist/gitalk.css?v=2.0.4"><title>Sqoop1.4.7实现将Mysql数据与Hadoop3.0数据互相抽取 | ━Start。平常心_</title></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Sqoop1.4.7实现将Mysql数据与Hadoop3.0数据互相抽取</h1><a id="logo" href="/.">━Start。平常心_</a><p class="description">作者：create17，座右铭：每一个成功人士的背后，必定曾经做出过勇敢而又孤独的决定。放弃不难，但坚持很酷~</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 主页</i></a><a href="/archives/"><i class="fa fa-archive"> 文章时间轴</i></a><a href="/about/"><i class="fa fa-user"> 自我介绍</i></a></div><div id="search-form"><div id="result-mask" class="hide"></div><label><input id="search-key" type="text" autocomplete="off" placeholder="搜索"></label><div id="result-wrap" class="hide"><div id="search-result"></div></div><div class="hide"><template id="search-tpl"><div class="item"><a href="/{path}" title="{title}"><div class="title">{title}</div><div class="time">{date}</div><div class="tags">{tags}</div></a></div></template></div></div></div><div id="layout" class="layout-g"><div class="layout-l"><div class="content_container"><div class="post"><h1 class="post-title">Sqoop1.4.7实现将Mysql数据与Hadoop3.0数据互相抽取</h1><div class="post-meta"><a href="/2019/08/01/Sqoop/use-sqoop-to-mysql-and-hadoop.html#comments" class="comment-count"></a><p><span class="date">2019-08-01</span><span><a href="/categories/Sqoop/" class="category">Sqoop</a></span><span><i id="busuanzi_container_page_pv"><i id="busuanzi_value_page_pv"></i><i>点击</i></i></span></p></div><div class="post-content"><div id="vip-container"><blockquote>
+<p>本文主要讲解 Sqoop 1.4.7 如何实现 Mysql 与 Hadoop 3.0 之间数据互相抽取的。</p>
+<p>环境基于 Ambari 2.7 + HDP 3.0 部署。</p>
+<p>之前写过一篇 Sqoop 1.4.6 如何实现 Mysql 与 Hadoop 2.x 之间数据互相抽取的，可参考：《<a href="https://841809077.github.io/2019/02/15/sqoop%E6%A6%82%E8%BF%B0%E5%8F%8Ashell%E6%93%8D%E4%BD%9C.html">sqoop概述及shell操作</a>》</p>
+</blockquote>
+<h3 id="一、Sqoop-Shell操作"><a href="#一、Sqoop-Shell操作" class="headerlink" title="一、Sqoop Shell操作"></a>一、Sqoop Shell操作</h3><a id="more"></a>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>–connect \<jdbc-uri></jdbc-uri></td>
+<td>指定JDBC连接字符串</td>
+</tr>
+<tr>
+<td>–username</td>
+<td>指定连接mysql用户名</td>
+</tr>
+<tr>
+<td>–password</td>
+<td>指定连接mysql密码</td>
+</tr>
+</tbody>
+</table>
+<h3 id="1-将Mysql数据导入到Hadoop中"><a href="#1-将Mysql数据导入到Hadoop中" class="headerlink" title="1. 将Mysql数据导入到Hadoop中"></a>1. 将Mysql数据导入到Hadoop中</h3><h4 id="1-1-数据导入到HDFS"><a href="#1-1-数据导入到HDFS" class="headerlink" title="1.1 数据导入到HDFS"></a>1.1 数据导入到HDFS</h4><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>table \<table name></table></td>
+<td>抽取mysql数据库中的表</td>
+</tr>
+<tr>
+<td>–target-dir \<path></path></td>
+<td>指定导入hdfs的具体位置。默认生成在为/user/\<user>/&lt;table_name&gt;/目录下</user></td>
+</tr>
+<tr>
+<td>-m &lt;数值&gt;</td>
+<td>执行map任务的个数，默认是4个</td>
+</tr>
+</tbody>
+</table>
+<p>将 mysql 数据库中的 hive 数据库中的 ROLES 表数据导入到 HDFS 中的 /tmp/root/111 目录下。执行代码如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sqoop import \</span><br><span class="line">--connect jdbc:mysql://10.6.6.72:3309/hive \</span><br><span class="line">--username root \</span><br><span class="line">--password root123 \</span><br><span class="line">--table ROLES \</span><br><span class="line">--target-dir /tmp/root/111 \</span><br><span class="line">--fields-terminated-by ',' \</span><br><span class="line">-m 1</span><br></pre></td></tr></table></figure>
+<p><strong>备注：-m 参数可以指定 map 任务的个数，默认是 4 个。如果指定为 1 个 map 任务的话，最终生成的 part-m-xxxxx 文件个数就为 1。在数据充足的情况下，生成的文件个数与指定 map 任务的个数是等值的。</strong></p>
+<h4 id="1-2-数据导入到Hive中"><a href="#1-2-数据导入到Hive中" class="headerlink" title="1.2 数据导入到Hive中"></a>1.2 数据导入到Hive中</h4><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>–hive-import</td>
+<td>将表导入Hive中</td>
+</tr>
+<tr>
+<td>–hive-table \<table name></table></td>
+<td>指定导入Hive的表名</td>
+</tr>
+<tr>
+<td>–fields-terminated-by \<char></char></td>
+<td>指定导入到hive中的文件数据格式</td>
+</tr>
+<tr>
+<td>-m &lt;数值&gt;</td>
+<td>执行map任务的个数，默认是4个</td>
+</tr>
+</tbody>
+</table>
+<p>将 mysql 数据库中的 hive 数据库中的 ROLES 表数据导入到 Hive 数据库中，并生成 roles_test 表。执行代码如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sqoop import \</span><br><span class="line">--connect jdbc:mysql://10.6.6.72:3309/hive \</span><br><span class="line">--username root \</span><br><span class="line">--password root123 \</span><br><span class="line">--hive-import \</span><br><span class="line">--table ROLES \</span><br><span class="line">--hive-database default \</span><br><span class="line">--hive-table roles_test \</span><br><span class="line">--fields-terminated-by ',' \</span><br><span class="line">-m 1</span><br></pre></td></tr></table></figure>
+<p><strong>备注：-m 参数可以指定 map 任务的个数，默认是 4 个。如果指定为 1 个 map 任务的话，最终生成在 /warehouse/tablespace/managed/hive/roles_test/base_xxxx 目录下的 000000_x 文件个数就为 1 。在数据充足的情况下，生成的文件个数与指定 map 任务的个数是等值的。</strong></p>
+<p><strong>提示：如果该步骤失败，可查看 FAQ 里面的 1 与 2 。</strong></p>
+<p>执行数据导入过程中，会触发 MapReduce 任务。任务执行成功以后，我们访问 Hive 验证一下数据是否导入成功。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">hive&gt;</span><span class="bash"> show tables;</span></span><br><span class="line">OK</span><br><span class="line">roles_test</span><br><span class="line"><span class="meta">hive&gt;</span><span class="bash"> select * from roles_test;</span></span><br><span class="line">OK</span><br><span class="line">1	1545355484	admin	admin</span><br><span class="line">2	1545355484	public	public</span><br><span class="line">Time taken: 0.536 seconds, Fetched: 2 row(s)</span><br></pre></td></tr></table></figure>
+<p>数据导入成功。</p>
+<h4 id="1-3-数据导入到HBase中"><a href="#1-3-数据导入到HBase中" class="headerlink" title="1.3 数据导入到HBase中"></a>1.3 数据导入到HBase中</h4><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>–column-family   \<family></family></td>
+<td>设置导入的目标列族</td>
+</tr>
+<tr>
+<td>–hbase-row-key   \<col></td>
+<td>指定要用作行键的输入列；如果没有该参数，默认为mysql表的主键</td>
+</tr>
+<tr>
+<td>–hbase-create-table</td>
+<td>如果执行，则创建缺少的HBase表</td>
+</tr>
+<tr>
+<td>–hbase-bulkload</td>
+<td>启用批量加载</td>
+</tr>
+</tbody>
+</table>
+<p>将 mysql 数据库中的 hive 数据库中的 roles 表数据导入到 HBase 中，并生成 roles_test 表。执行代码如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">sqoop import \</span><br><span class="line">--connect jdbc:mysql://10.6.6.72:3309/hive \</span><br><span class="line">--username root \</span><br><span class="line">--password root123 \</span><br><span class="line">--table ROLES \</span><br><span class="line">--hbase-table roles_test \</span><br><span class="line">--column-family info \</span><br><span class="line">--hbase-row-key ROLE_ID \</span><br><span class="line">--hbase-create-table \</span><br><span class="line">--hbase-bulkload</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>关于参数–hbase-bulkload的解释：</p>
+</blockquote>
+<p>实现将数据批量的导入Hbase数据库中，BulkLoad特性能够利用MR计算框架将源数据直接生成内部的HFile格式，直接将数据快速的load到HBase中。</p>
+<p>细心的你可能会发现，使用–hbase-bulkload参数会触发MapReduce的reduce任务。</p>
+<p>执行数据导入过程中，会触发MapReduce任务。任务执行成功以后，我们访问HBase验证一下数据是否导入成功。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">hbase(main):002:0&gt; list</span><br><span class="line">TABLE          </span><br><span class="line">roles_test                                                         </span><br><span class="line">1 row(s) in 0.1030 seconds</span><br><span class="line">=&gt; ["roles_test"]</span><br><span class="line">hbase(main):003:0&gt; scan "roles_test"</span><br><span class="line"></span><br><span class="line">ROW                                              COLUMN+CELL                                                                                                                  </span><br><span class="line"> 1                                               column=info:CREATE_TIME, timestamp=1548319280991, value=1545355484                                                                          </span><br><span class="line"> 1                                               column=info:OWNER_NAME, timestamp=1548319280991, value=admin                                                                                </span><br><span class="line"> 1                                               column=info:ROLE_NAME, timestamp=1548319280991, value=admin                                                                                 </span><br><span class="line"> 2                                               column=info:CREATE_TIME, timestamp=1548319282888, value=1545355484                                                                          </span><br><span class="line"> 2                                               column=info:OWNER_NAME, timestamp=1548319282888, value=public                                                                       </span><br><span class="line"> 2                                               column=info:ROLE_NAME, timestamp=1548319282888, value=public                                                          </span><br><span class="line">2 row(s) in 0.0670 seconds</span><br></pre></td></tr></table></figure>
+<p><strong>总结：roles_test表的row_key是源表的主键ROLE_ID值，其余列均放入了info这个列族中。</strong></p>
+<h3 id="2-将Hadoop数据导出到Mysql中"><a href="#2-将Hadoop数据导出到Mysql中" class="headerlink" title="2. 将Hadoop数据导出到Mysql中"></a>2. 将Hadoop数据导出到Mysql中</h3><p>Sqoop export 工具将一组文件从 HDFS 导出回 Mysql 。目标表必须已存在于数据库中。根据用户指定的分隔符读取输入文件并将其解析为一组记录。</p>
+<p>默认操作是将这些转换为一组INSERT将记录注入数据库的语句。在“更新模式”中，Sqoop 将生成 UPDATE 替换数据库中现有记录的语句，并且在“调用模式”下，Sqoop 将为每条记录进行存储过程调用。</p>
+<p>将 HDFS、Hive、HBase的数据导出到 Mysql 表中，都会用到下表的参数：</p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>–table \<table name></table></td>
+<td>指定要导出的mysql目标表</td>
+</tr>
+<tr>
+<td>–export-dir \<path></path></td>
+<td>指定要导出的hdfs路径</td>
+</tr>
+<tr>
+<td>–input-fields-terminated-by \<char></char></td>
+<td>指定输入字段分隔符</td>
+</tr>
+<tr>
+<td>-m &lt;数值&gt;</td>
+<td>执行map任务的个数，默认是4个</td>
+</tr>
+</tbody>
+</table>
+<h4 id="2-1-HDFS数据导出至Mysql"><a href="#2-1-HDFS数据导出至Mysql" class="headerlink" title="2.1 HDFS数据导出至Mysql"></a>2.1 HDFS数据导出至Mysql</h4><p>首先在 test 数据库中创建 roles_hdfs 数据表：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">USE test;</span><br><span class="line">CREATE TABLE `roles_hdfs` (</span><br><span class="line">`ROLE_ID` bigint(20) NOT NULL ,</span><br><span class="line">`CREATE_TIME` int(11) NOT NULL ,</span><br><span class="line">`OWNER_NAME` varchar(128) DEFAULT NULL ,</span><br><span class="line">`ROLE_NAME` varchar(128) DEFAULT NULL ,</span><br><span class="line">PRIMARY KEY (`ROLE_ID`)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>将HDFS上的数据导出到mysql的test数据库的roles_hdfs表中，执行代码如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sqoop export \</span><br><span class="line">--connect jdbc:mysql://10.6.6.72:3309/test \</span><br><span class="line">--username root \</span><br><span class="line">--password root123 \</span><br><span class="line">--table roles_hdfs \</span><br><span class="line">--export-dir /tmp/root/111 \</span><br><span class="line">--input-fields-terminated-by ',' \</span><br><span class="line">-m 1</span><br></pre></td></tr></table></figure>
+<p>执行数据导入过程中，会触发MapReduce任务。任务成功之后，前往mysql数据库查看是否导入成功。</p>
+<h4 id="2-2-Hive数据导出至Mysql"><a href="#2-2-Hive数据导出至Mysql" class="headerlink" title="2.2 Hive数据导出至Mysql"></a>2.2 Hive数据导出至Mysql</h4><p>首先在test数据库中创建roles_hive数据表：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE `roles_hive` (</span><br><span class="line">`ROLE_ID` bigint(20) NOT NULL ,</span><br><span class="line">`CREATE_TIME` int(11) NOT NULL ,</span><br><span class="line">`OWNER_NAME` varchar(128) DEFAULT NULL ,</span><br><span class="line">`ROLE_NAME` varchar(128) DEFAULT NULL ,</span><br><span class="line">PRIMARY KEY (`ROLE_ID`)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>由于Hive数据存储在 HDFS 上，所以从根本上还是将 HDFS 上的文件导出到 mysql 的 test 数据库的 roles_hive 表中，执行代码如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sqoop export \</span><br><span class="line">--connect jdbc:mysql://10.6.6.72:3309/test \</span><br><span class="line">--username root \</span><br><span class="line">--password root123 \</span><br><span class="line">--table roles_hive \</span><br><span class="line">--export-dir /warehouse/tablespace/managed/hive/roles_test/base_0000001 \</span><br><span class="line">--input-fields-terminated-by ',' \</span><br><span class="line">-m 1</span><br></pre></td></tr></table></figure>
+<h4 id="2-3-HBase数据导出至Mysql"><a href="#2-3-HBase数据导出至Mysql" class="headerlink" title="2.3 HBase数据导出至Mysql"></a>2.3 HBase数据导出至Mysql</h4><p>目前 Sqoop 不支持从 HBase 直接导出到关系型数据库。可以使用 Hive 周转一下。</p>
+<h5 id="2-3-1-创建hive外部表"><a href="#2-3-1-创建hive外部表" class="headerlink" title="2.3.1 创建hive外部表"></a>2.3.1 创建hive外部表</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">create external table hive_hbase(id int,CREATE_TIME string,OWNER_NAME string,ROLE_NAME string)</span><br><span class="line">stored by 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'</span><br><span class="line">with serdeproperties ("hbase.columns.mapping" = ":key,info:CREATE_TIME,info:OWNER_NAME,info:ROLE_NAME")</span><br><span class="line">tblproperties("hbase.table.name" = "roles_test");</span><br></pre></td></tr></table></figure>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190201/20190215224723.png" alt></p>
+<h5 id="2-3-2-创建Hive内部表"><a href="#2-3-2-创建Hive内部表" class="headerlink" title="2.3.2 创建Hive内部表"></a>2.3.2 创建Hive内部表</h5><p>创建适配于 Hive 外部表的内部表：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">create table if not exists hive_export(id int, CREATE_TIME string, OWNER_NAME string, ROLE_NAME string)</span><br><span class="line">row format delimited fields terminated by ',' stored as textfile;</span><br></pre></td></tr></table></figure>
+<p>hive_hbase 外部表的源是 HBase 表数据，当创建适配于 hive_hbase 外部表的 Hive 内部表时，指定行的格式为 “,” 。</p>
+<h5 id="2-3-3-将外部表的数据导入到内部表中"><a href="#2-3-3-将外部表的数据导入到内部表中" class="headerlink" title="2.3.3 将外部表的数据导入到内部表中"></a>2.3.3 将外部表的数据导入到内部表中</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">insert overwrite table hive_export</span><br><span class="line">select * from hive_hbase;</span><br></pre></td></tr></table></figure>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190201/20190215225048.png" alt></p>
+<p><strong>备注：如果该步骤报错，可查看 FAQ 的 3 。</strong></p>
+<h5 id="2-3-4-创建Mysql表"><a href="#2-3-4-创建Mysql表" class="headerlink" title="2.3.4 创建Mysql表"></a>2.3.4 创建Mysql表</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE `roles_hbase` (</span><br><span class="line">`id` bigint(20) NOT NULL,</span><br><span class="line">` create_time` varchar(128) NOT NULL ,</span><br><span class="line">` owner_name` varchar(128) DEFAULT NULL ,</span><br><span class="line">` role_name` varchar(128) DEFAULT NULL ,</span><br><span class="line">PRIMARY KEY (`id`)</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<h5 id="2-3-5-执行sqoop-export"><a href="#2-3-5-执行sqoop-export" class="headerlink" title="2.3.5 执行sqoop export"></a>2.3.5 执行sqoop export</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sqoop export \</span><br><span class="line">--connect jdbc:mysql://10.6.6.72:3309/test \</span><br><span class="line">--username root \</span><br><span class="line">--password root123 \</span><br><span class="line">--table roles_hbase \</span><br><span class="line">--export-dir /warehouse/tablespace/managed/hive/hive_export/base_0000003 \</span><br><span class="line">--input-fields-terminated-by ',' \</span><br><span class="line">-m 1</span><br></pre></td></tr></table></figure>
+<p>查看mysql中的roles_hbase表，数据成功被导入。</p>
+<p><strong>备注：在创建表的时候，一定要注意表字段的类型，如果指定表类型不一致，有可能会报错。</strong></p>
+<h3 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h3><p>使用 Sqoop import / export 命令，可以实现将关系型数据库中的数据与 Hadoop 中的数据进行相互转化，其中一些转化的细节，可以指定参数实现。在执行过程中，sqoop shell 操作会转化为 MapReduce 任务来实现数据的抽取。</p>
+<p>更多的sqoop操作，详情请参见：<a href="http://sqoop.apache.org/docs/1.4.7/SqoopUserGuide.html" target="_blank" rel="noopener">http://sqoop.apache.org/docs/1.4.7/SqoopUserGuide.html</a></p>
+<h3 id="二、FAQ"><a href="#二、FAQ" class="headerlink" title="二、FAQ"></a>二、FAQ</h3><h4 id="1-Sqoop将Mysql数据导入到Hive中，出现类似卡住的现象"><a href="#1-Sqoop将Mysql数据导入到Hive中，出现类似卡住的现象" class="headerlink" title="1. Sqoop将Mysql数据导入到Hive中，出现类似卡住的现象"></a>1. Sqoop将Mysql数据导入到Hive中，出现类似卡住的现象</h4><p><strong>问题描述：</strong></p>
+<p>如下图所示：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190601/20190801221614.png" alt></p>
+<p><strong>问题分析：</strong></p>
+<p>在 Hive 3 的版本中，进入 hive 命令行需要执行输入用户名和密码。猜测流程被卡住的原因正是缺少用户名和密码的输入。</p>
+<p><strong>解决办法：</strong></p>
+<p>编辑所在主机的beeline-site.xml文件，执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vim /etc/hive/conf/beeline-site.xml</span><br></pre></td></tr></table></figure>
+<p>在 beeline.hs2.jdbc.url.container 配置值末尾增加登陆 hive 的用户名和密码，比如： user=hive;password=hive，如下图所示：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190601/20190801221720.png" alt></p>
+<p>保存修改后，无需重启Hive服务，直接生效。此时则可以再次执行Sqoop相关命令进行尝试。</p>
+<p>参考链接：<a href="https://community.hortonworks.com/questions/214980/sqoop-import-hung-hive-import-hdp-300.html" target="_blank" rel="noopener">https://community.hortonworks.com/questions/214980/sqoop-import-hung-hive-import-hdp-300.html</a></p>
+<h4 id="2-ERROR-tool-ImportTool-Import-failed-java-io-IOException-Hive-exited-with-status-2"><a href="#2-ERROR-tool-ImportTool-Import-failed-java-io-IOException-Hive-exited-with-status-2" class="headerlink" title="2. ERROR tool.ImportTool: Import failed: java.io.IOException: Hive exited with status 2"></a>2. ERROR tool.ImportTool: Import failed: java.io.IOException: Hive exited with status 2</h4><p><strong>问题描述：</strong></p>
+<p>执行 Sqoop 命令将 Mysql 数据导入 Hive 过程中，出现错误，错误信息如下图所示：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190601/20190801221814.png" alt></p>
+<p><strong>问题分析：</strong></p>
+<p>程序在进入Hive以后报错，怀疑Sqoop将数据插入目标表中报错，有可能为用户权限问题。</p>
+<p><strong>解决办法：</strong></p>
+<p>将执行Sqoop shell的用户切换为hive用户，执行如下命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">su - hive</span><br></pre></td></tr></table></figure>
+<h4 id="3-查询hive外部表数据并将查询结果插入到hive内部表失败"><a href="#3-查询hive外部表数据并将查询结果插入到hive内部表失败" class="headerlink" title="3. 查询hive外部表数据并将查询结果插入到hive内部表失败"></a>3. 查询hive外部表数据并将查询结果插入到hive内部表失败</h4><p><strong>问题描述：</strong></p>
+<p>查询hive外部表数据并将查询结果插入到hive内部表失败，出现KeeperErrorCode = NoNode for /hbase/meta-region-server的错误，如下图所示：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190601/20190801222212.png" alt></p>
+<p><strong>问题分析：</strong></p>
+<p>经过分析报错，发现提示找不到/hbase/meta-region-server这个zookeeper节点。HBase的zookeeper.znode.parent属性值为/hbase-unsecure，自然找不到/hbase/meta-region-server节点而报错。</p>
+<p><strong>解决方法：</strong></p>
+<p>整体思路就是添加 zookeeper.znode.parent 到 Hive 配置中。</p>
+<ul>
+<li>方法一（临时）：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">su – hive</span><br><span class="line">hive -hiveconf zookeeper.znode.parent=/hbase-unsecure</span><br></pre></td></tr></table></figure>
+<ul>
+<li>方法二（永久）：</li>
+</ul>
+<p>打开管理系统的Hive配置页面，点击 “高级配置 &gt; 自定义hive-site”，添加zookeeper.znode.parent属性，添加后如下图所示：</p>
+<p><img src="https://gcore.jsdelivr.net/gh/841809077/blog-img/20190601/20190801222257.png" alt></p>
+<p>修改后保存配置，并重启 Hive 服务。</p>
+<hr>
+</div>
+
+			<script src="https://my.openwrite.cn/js/readmore.js" type="text/javascript"></script>
+			<script>
+			var isMobile = navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i);
+			if (!isMobile) {
+			    var btw = new BTWPlugin();
+			    btw.init({
+			        "id": "vip-container",
+			        "blogId": "15743-1570943068343-906",
+			        "name": "大数据实战演练",
+			        "qrcode": "https://gcore.jsdelivr.net/gh/841809077/blog-img/20181110/20181118235726.jpg",
+			        "keyword": "vip"
+			    });
+			}
+			</script>
+		</div><strong>再见</strong><br><hr class="bottom_msg"><br><h3><a href="#点关注，不迷路" title="点关注，不迷路" class="headerlink">点关注，不迷路</a></h3><br><p>好了各位，以上就是这篇文章的全部内容了，能看到这里的人呀，都是<strong>人才</strong>。</p><br><p><strong>白嫖不好，创作不易。</strong>各位的支持和认可，就是我创作的最大动力，我们下篇文章见！</p><br><p>如果本篇博客有任何错误，请批评指教，不胜感激 ！</p><br><div class="post-qrcode"><div class="qrcode_bar center"><img src="/img/qrcode.png" title="扫一扫交个朋友" alt="微信公众号二维码" width="100%"></div></div><script type="text/javascript" src="/js/jquery.js?v=2.0.4" async></script><div class="post-donate"><div id="donate_board" class="donate_bar center"><a id="btn_donate" href="javascript:;" title="打赏" class="btn_donate"></a><div class="donate_txt"> &uarr;<br>坚持原创技术分享，您的支持将鼓励我继续创作！<br></div></div><div id="donate_guide" class="donate_bar center hidden pay"><img src="/img/weChatMoney.png" id="wechatpay" title="微信打赏" alt="微信打赏"><img src="/img/alipayMoney.png" id="alipay" title="支付宝打赏" alt="支付宝打赏"></div><script type="text/javascript">document.getElementById('btn_donate').onclick = function(){
+    // $('#donate_board').addClass('hidden');
+    // $('#donate_guide').removeClass('hidden');
+    $('#donate_guide').toggle();
+}</script></div><script type="text/javascript" src="/js/jquery.fancybox.js?v=2.0.4" async></script><script type="text/javascript" src="/js/wrapImage.js?v=2.0.4" async></script><div class="post-copyright"><blockquote><p>原文作者: create17</p><p>原文链接: <a href="https://841809077.github.io/2019/08/01/Sqoop/use-sqoop-to-mysql-and-hadoop.html">https://841809077.github.io/2019/08/01/Sqoop/use-sqoop-to-mysql-and-hadoop.html</a></p><p>版权声明: 转载请注明出处(码字不易，请保留作者署名及链接，谢谢配合！)</p></blockquote></div><div class="tags"></div><div class="post-share"><div class="social-share"><span>分享到:</span></div></div><div class="post-nav"><a href="/2019/08/07/ELK/Elasticsearch/Client/jestclient-operate-elasticsearch.html" class="pre">Elasticsearch jestClient客户端写法</a><a href="/2019/07/14/Kafka/specified-offset-consume.html" class="next">Kafka消费者 之 指定位移消费</a></div><div id="comments"><div id="container"><script type="text/javascript" src="https://unpkg.com/gitalk/dist/gitalk.min.js?v=2.0.4"></script><script type="text/javascript" src="//cdn.bootcss.com/blueimp-md5/2.10.0/js/md5.js?v=2.0.4"></script><script>var gitalk = new Gitalk({
+  clientID: '7ff674ca1078ead070aa',
+  clientSecret: 'f176d4d73417fd566e3e0ac6319aeb4708f4099d',
+  repo: '841809077.github.io',
+  owner: '841809077',
+  admin: ['841809077'],
+  id: md5(window.location.pathname),
+  distractionFreeMode: false,
+  language: 'zh-CN',
+  pagerDirection: 'last'
+})
+gitalk.render('container')</script></div></div></div></div></div><div class="layout-r"><div id="sidebar"><div class="search-pla"></div><div id="toc" class="widget"><div class="widget-title"><i class="fa fa-fei">文章目录</i></div><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#一、Sqoop-Shell操作"><span class="toc-text">一、Sqoop Shell操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-将Mysql数据导入到Hadoop中"><span class="toc-text">1. 将Mysql数据导入到Hadoop中</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-数据导入到HDFS"><span class="toc-text">1.1 数据导入到HDFS</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-数据导入到Hive中"><span class="toc-text">1.2 数据导入到Hive中</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-数据导入到HBase中"><span class="toc-text">1.3 数据导入到HBase中</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-将Hadoop数据导出到Mysql中"><span class="toc-text">2. 将Hadoop数据导出到Mysql中</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-HDFS数据导出至Mysql"><span class="toc-text">2.1 HDFS数据导出至Mysql</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-Hive数据导出至Mysql"><span class="toc-text">2.2 Hive数据导出至Mysql</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-HBase数据导出至Mysql"><span class="toc-text">2.3 HBase数据导出至Mysql</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-1-创建hive外部表"><span class="toc-text">2.3.1 创建hive外部表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-2-创建Hive内部表"><span class="toc-text">2.3.2 创建Hive内部表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-3-将外部表的数据导入到内部表中"><span class="toc-text">2.3.3 将外部表的数据导入到内部表中</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-4-创建Mysql表"><span class="toc-text">2.3.4 创建Mysql表</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-3-5-执行sqoop-export"><span class="toc-text">2.3.5 执行sqoop export</span></a></li></ol></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-总结"><span class="toc-text">3. 总结</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#二、FAQ"><span class="toc-text">二、FAQ</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-Sqoop将Mysql数据导入到Hive中，出现类似卡住的现象"><span class="toc-text">1. Sqoop将Mysql数据导入到Hive中，出现类似卡住的现象</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-ERROR-tool-ImportTool-Import-failed-java-io-IOException-Hive-exited-with-status-2"><span class="toc-text">2. ERROR tool.ImportTool: Import failed: java.io.IOException: Hive exited with status 2</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-查询hive外部表数据并将查询结果插入到hive内部表失败"><span class="toc-text">3. 查询hive外部表数据并将查询结果插入到hive内部表失败</span></a></li></ol></li></ol></div><div class="widget"><div class="widget-title"><i class="fa fa-xie"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2023/03/13/ELK/Elasticsearch/API/es-query-dsl.html">Elasticsearch Query DSL 查询</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/11/09/ELK/Elasticsearch/疑难问题/fielddata-data-too-large.html">Elasticsearch查询报错：FIELDDATA Data is too large</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/12/ELK/Elasticsearch/Client/elasticsearch-bool-query.html">Elasticsearch bool复合查询</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/12/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-client-query.html">Elasticsearch-7.6.2客户端查询指南</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/11/Prometheus/prometheus-query-functions.html">Prometheus常用查询函数梳理</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/10/07/ELK/Elasticsearch/Client/Elasticsearch-7.6.2-xpack-java-client.html">Elasticsearch-7.6.2部署并开启xpack，java客户端明文密码连接指南</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/30/Prometheus/Exporter/rabbitmq-exporter.html">RabbitMQ exporter部署</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/09/20/GoLang/go-time-usage.html">golang 时间相关操作集合</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/08/12/Ambari/运维相关/hdp-copmonment-version.html">如何查看HDP各组件版本信息，两种办法</a></li><li class="post-list-item"><a class="post-list-link" href="/2022/07/28/Docker/docker-faq.html">docker 常见问题解答汇总</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-weixin"> 微信公众号</i></div><img width="100%" height="100%" title="微信扫一扫，订阅更多技术干货" alt="啊哦，图片丢失了... 加我微信: create17_，联系我吧" src="/img/prcode_square.jpg"/></div><div class="widget"><div class="widget-title"><i class="iconfont2 iconscan"> 加我好友（与我互动）</i></div><div class="img-po"><img width="100%" height="100%" title="微信扫一扫，欢迎与我交流！" alt="微信号: create17_，欢迎与我交流！" src="/img/wechat_code.jpg"/></div></div><div class="widget"><div class="widget-title"><i class="fa fa-gui"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/AlertManager/">AlertManager</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Ambari/">Ambari</a><span class="category-list-count">33</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Docker/">Docker</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK/">ELK</a><span class="category-list-count">21</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/EmberJS/">EmberJS</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/FastDFS/">FastDFS</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Flume/">Flume</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/GoLang/">GoLang</a><span class="category-list-count">14</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HBase/">HBase</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HDFS/">HDFS</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/HUE/">HUE</a><span class="category-list-count">10</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Hadoop/">Hadoop</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/JavaScript/">JavaScript</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Java工具类/">Java工具类</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/K8s/">K8s</a><span class="category-list-count">12</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kafka/">Kafka</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kerberos/">Kerberos</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kettle/">Kettle</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Kylin/">Kylin</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Linux/">Linux</a><span class="category-list-count">16</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MongoDB/">MongoDB</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/MySQL/">MySQL</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/PostgreSQL/">PostgreSQL</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Prometheus/">Prometheus</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Python/">Python</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scala/">Scala</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Scrapy爬虫框架/">Scrapy爬虫框架</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Solr/">Solr</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Spark/">Spark</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Sqoop/">Sqoop</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Zookeeper/">Zookeeper</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/go语言/">go语言</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/hexo搭建个人博客/">hexo搭建个人博客</a><span class="category-list-count">11</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/springboot/">springboot</a><span class="category-list-count">22</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/yarn/">yarn</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/你有酒我有故事/">你有酒我有故事</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/大数据/">大数据</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/开发工具/">开发工具</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/浏览器插件/">浏览器插件</a><span class="category-list-count">1</span></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-biao"> 标签</i></div><div class="tagcloud"><a href="/tags/hexo/" style="font-size: 15px;">hexo</a> <a href="/tags/hadoop服务组件/" style="font-size: 15px;">hadoop服务组件</a> <a href="/tags/Hadoop服务组件/" style="font-size: 15px;">Hadoop服务组件</a> <a href="/tags/security/" style="font-size: 15px;">security</a> <a href="/tags/ntp/" style="font-size: 15px;">ntp</a> <a href="/tags/Linux/" style="font-size: 15px;">Linux</a> <a href="/tags/Kylin/" style="font-size: 15px;">Kylin</a> <a href="/tags/nginx/" style="font-size: 15px;">nginx</a> <a href="/tags/python实战/" style="font-size: 15px;">python实战</a> <a href="/tags/idea/" style="font-size: 15px;">idea</a> <a href="/tags/ambari/" style="font-size: 15px;">ambari</a> <a href="/tags/自定义服务/" style="font-size: 15px;">自定义服务</a> <a href="/tags/书籍福利/" style="font-size: 15px;">书籍福利</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-archive"> 归档</i></div><ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2023/03/">三月 2023</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/11/">十一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/10/">十月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/09/">九月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/08/">八月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/03/">三月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/02/">二月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/01/">一月 2021</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/12/">十二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/11/">十一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">十月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/09/">九月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/08/">八月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/07/">七月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/06/">六月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/05/">五月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/04/">四月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/03/">三月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/02/">二月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/01/">一月 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/12/">十二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/11/">十一月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/10/">十月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/09/">九月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/08/">八月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/07/">七月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/06/">六月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/05/">五月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">四月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">三月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/02/">二月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">一月 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">十二月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">十一月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/10/">十月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">九月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">八月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/07/">七月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">六月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">五月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/04/">四月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/03/">三月 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">十二月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">十月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-you"> 友情链接</i></div><ul></ul><a href="https://blog.csdn.net/CREATE_17" title="CSDN - CREATE_17" target="_blank">CSDN - CREATE_17</a><ul></ul><a href="https://www.iteblog.com/" title="过往记忆 的大数据博客" target="_blank">过往记忆 的大数据博客</a><ul></ul><a href="https://shirukai.github.io/" title="Rukai Shi 的大数据博客" target="_blank">Rukai Shi 的大数据博客</a><ul></ul><a href="https://liunaijie.github.io/" title="蒙娜丽莎法师" target="_blank">蒙娜丽莎法师</a></div></div></div></div><a id="totop" href="#top"></a><div id="footer"><div class="footer-info"><p><a href="/baidusitemap.xml">网站地图</a> |  <a href="/atom.xml">订阅本站</a> |  <a href="/about/">联系博主</a></p><p>本站总访问量：<i id="busuanzi_container_site_pv"><i id="busuanzi_value_site_pv"></i></i>次，本站总访客数:<i id="busuanzi_container_site_uv"><i id="busuanzi_value_site_uv"></i></i>人</p><p><span> Copyright &copy;<a href="/." rel="nofollow">create17.</a></span><span> Theme by<a rel="nofollow" target="_blank" href="https://github.com/chaooo/hexo-theme-BlueLake"> BlueLake.</a></span><span> Count by<a href="http://busuanzi.ibruce.info/"> busuanzi.</a></span><span> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a></span></p></div></div></div><script src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js" async></script><script type="text/javascript" src="/js/search.json.js?v=2.0.4"></script><script type="text/javascript" src="/js/toctotop.js?v=2.0.4" async></script><link rel="stylesheet" type="text/css" href="/share/css/share.css"><script type="text/javascript" src="/share/js/social-share.js" charset="utf-8"></script><script type="text/javascript" src="/share/js/qrcode.js" charset="utf-8"></script></body></html>
